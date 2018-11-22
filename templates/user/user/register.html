@@ -1,0 +1,60 @@
+
+{% extends 'partials/index.html' %}
+{% load widget_tweaks %}
+{% block content %}
+    <div class="col-md-8 col-md-offset-2">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">User Register</h3>
+            </div>
+            <div class="panel-body">
+                {# show errors message #}
+                {% if form.errors %}
+                    <div id="errors">
+                        <div class="inner">
+                            <p> Errors Message</p>
+                            {{ form.non_field_errors }}
+                            <ul>
+                                {% for field in form %}
+                                    {% if field.errors %}
+                                        <li><span class="text-danger">{{ field.label }}: </span>
+                                            <span class="text-danger">{{ field.errors|striptags }}</span>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                <form method="post" action="{% url 'user_register' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_username" class="control-label">Username:</label>
+                        <input type="text" name="username" class="form-control" id="id_username" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_email" class="control-label">Email:</label>
+                        <input type="email" name="email" class="form-control" id="id_email" autocomplete="off">
+                    </div>
+                     <div class="form-group">
+                        <label for="id_phone" class="control-label">Phone:</label>
+                        <input type="number" name="phone" class="form-control" id="id_phone" autocomplete="off">
+                    </div>
+                     <div class="form-group">
+                        <label for="id_location" class="control-label">Location:</label>
+                        <input type="text" name="location" class="form-control" id="id_location" autocomplete="off" style='text-transform:uppercase'>
+                    </div>
+                     <div class="form-group">
+                        <label for="bod" class="control-label">Birth Date:</label>
+                        <input type="date" name="birth_date" class="form-control" id="bod" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_password" class="control-label">Password:</label>
+                        <input type="password" name="password" class="form-control" id="id_password" autocomplete="off">
+                    </div>
+                    <input type="submit" value="Login" class="form-control btn btn-primary">
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
