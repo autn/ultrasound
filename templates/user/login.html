@@ -1,28 +1,18 @@
 {% extends 'partials/index.html' %}
 {% block content %}
-    <div class="col-md-6 col-md-offset-3">
+    <div class="col-md-8 col-md-offset-2">
         <div class="panel panel-info">
             <div class="panel-heading">
                 <h3 class="panel-title">User Login</h3>
             </div>
             <div class="panel-body">
-                {# show errors message #}
-                {% if form.errors %}
-                    <div id="errors">
-                        <div class="inner">
-                            <p> Errors Message</p>
-                            {{ form.non_field_errors }}
-                            <ul>
-                                {% for field in form %}
-                                    {% if field.errors %}
-                                        <li><span class="text-danger">{{ field.label }}: </span>
-                                            <span class="text-danger">{{ field.errors|striptags }}</span>
-                                        </li>
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
+                {% if messages %}
+                    {% for message in messages %}
+                      <div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">
+                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <strong>Errors!</strong> {{ message|safe }}
+                      </div>
+                    {% endfor %}
                 {% endif %}
                 <form method="post" action="{% url 'user_login' %}" enctype="multipart/form-data">
                     {% csrf_token %}

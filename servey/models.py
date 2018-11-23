@@ -21,21 +21,18 @@ TRAINING_LEVEL = (
 )
 
 CONFIDENCE_LEVEL = (
+ ('Somewhat confident', 'Somewhat confident'),
+ ('Not at all confident', 'Not at all confident'),
+ ('Moderately confident', 'Moderately confident'),
  ('Very confident', 'Very confident'),
- ('confident', 'confident'),
- ('somewhat confident', 'somewhat confident'),
- ('somewhat not confident', 'somewhat not confident'),
- ('not confident', 'not confident'),
- ('very not confident', 'very not confident'),
+ ('Completely confident', 'Completely confident'),
 )
 
 EXPERIENCE_NUMBER = (
- ('none', 'none'),
- ('0-10', '0-10'),
- ('11-20', '11-20'),
- ('21-50', '21-50'),
- ('50-100', '50-100'),
- ('> 100', '> 100'),
+ ('None', 'None'),
+ ('1-20 scans interpreted', '1-20 scans interpreted'),
+ ('21-100 scans interpreted', '21-100 scans interpreted'),
+ ('> 100 scans interpreted', '> 100 scans interpreted'),
 )
 
 ACCURACY_THRESHOLD = (
@@ -79,11 +76,11 @@ class ResultDetail(models.Model):
 
 class UserInfo(models.Model):
     user = models.OneToOneField(User, related_name='user_info', on_delete=models.CASCADE)
-    training_type = models.CharField(verbose_name='Training Type', choices=TRAINING_TYPE, blank=True, null=True, max_length=255)
+    training_type = models.CharField(choices=TRAINING_TYPE, blank=True, null=True, max_length=255)
     accuracy = models.CharField(max_length=255, choices=ACCURACY_THRESHOLD, blank=True, null=True)
-    institution = models.TextField()
-    training_level =  models.CharField(verbose_name='Training level', choices=TRAINING_LEVEL, max_length=255)
+    institution = models.TextField(blank=True, null=True, max_length=255)
+    training_level =  models.CharField(choices=TRAINING_LEVEL, max_length=255,  blank=True, null=True)
     experience = models.CharField(choices=EXPERIENCE_NUMBER, blank=True, null=True, max_length=255)
-    confidence_level = models.CharField(blank=True, choices=CONFIDENCE_LEVEL, max_length=255)
+    confidence_level = models.CharField(blank=True, choices=CONFIDENCE_LEVEL, max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

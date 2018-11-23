@@ -1,5 +1,46 @@
 {% extends 'partials/index.html' %}
 
 {% block content %}
-    <h1>CLIENT</h1>
+    {% if request.user.is_authenticated %}
+        <div class="flex">
+            <h3 class="">Select training type:</h3>
+            <form method="post" action="{% url 'index' %}" enctype="multipart/form-data" id="form_training_type" class="form-inline">
+                {% csrf_token %}
+                <div class="form-group">
+                    <select name="training_type" class="form-control" id="training_type">
+                        {% for typeKey, typeValue in training_type %}
+                           <option value="{{ typeKey }}">{{ typeValue }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="procent" style="display: block;">
+                        <label class="label">
+                            Procent
+                        </label>
+                        <ul id="id_procent">
+                    <li><label for="id_procent_0"><input name="procent" value="70%" maxlength="100" id="id_procent_0" type="radio">
+                 70%</label>
+
+                </li>
+                    <li><label for="id_procent_1"><input name="procent" value="80%" maxlength="100" id="id_procent_1" type="radio">
+                 80%</label>
+
+                </li>
+                    <li><label for="id_procent_2"><input name="procent" value="90%" maxlength="100" id="id_procent_2" type="radio">
+                 90%</label>
+
+                </li>
+                    <li><label for="id_procent_3"><input name="procent" value="95%" maxlength="100" id="id_procent_3" type="radio">
+                 95%</label>
+
+                </li>
+                </ul>
+                </div>
+                <input type="submit" value="Create" class="btn btn-primary pull-right">
+            </form>
+        </div>
+    {% else %}
+        <h3 class="text-center">Please <a href="{% url 'user_login' %}">Login</a> to take the test</h3>
+    {% endif %}
+
 {% endblock %}

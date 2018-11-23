@@ -38,7 +38,36 @@
                         <label for="id_password" class="control-label">Password:</label>
                         <input type="password" name="password" class="form-control" id="id_password" autocomplete="off">
                     </div>
-                    <input type="submit" value="Login" class="form-control btn btn-primary">
+                    <div class="form-group">
+                        <label for="id_institution" class="control-label">Your Institution:</label>
+                        <input type="text" name="institution" class="form-control" id="id_institution" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="training_level" class="control-label">Your level of training:</label>
+{#                        <input type="password" name="password" class="form-control" id="id_password" autocomplete="off">#}
+                        <select name="training_level" class="form-control" id="training_level">
+                            {% for levelKey, levelValue in training_level %}
+                               <option value="{{ levelKey }}">{{ levelValue }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="experience_number" class="control-label">Prior experience interpreting TTE:</label>
+                        <select name="experience_number" class="form-control" id="experience_number">
+                            {% for experienceKey, experienceValue in experience_number %}
+                               <option value="{{ experienceKey }}">{{ experienceValue }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="confidence_level" class="control-label">Confidence level in interpreting echocardiograms:</label>
+                        <select name="confidence_level" class="form-control" id="confidence_level" >
+                            {% for confidenceKey, confidenceValue in confidence_level %}
+                               <option value="{{ confidenceKey }}">{{ confidenceValue }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <input type="submit" value="Register" class="btn btn-primary pull-right">
                 </form>
             </div>
         </div>
