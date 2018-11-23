@@ -15,11 +15,13 @@ class VideoAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
     # inlines = [InlineQuestion]
 
-    def save_model(self, request, obj, form, change):
-        # custom stuff here
-        url = obj.URL
-        video_id = url.split("=")
-        obj.URL = video_id[1]
-        super().save_model(request, obj, form, change)
-        # obj.save()
+    # def save_model(self, request, obj, form, change):
+    #     # custom stuff here
+    #     url = obj.URL
+    #     video_id = url.split("=")
+    #     obj.URL = video_id[1]
+    #     super().save_model(request, obj, form, change)
+    #     # obj.save()
 
+
+admin.site.site_header="Ultrasound trainer"

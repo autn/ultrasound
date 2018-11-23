@@ -1,5 +1,4 @@
-from django.shortcuts import render
-from django.shortcuts import render, redirect, Http404
+from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -7,6 +6,7 @@ from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.template.defaultfilters import slugify
+from django.http import HttpResponseRedirect
 # Create your views here.
 
 
@@ -37,6 +37,8 @@ def user_register(request):
 
 
 def user_login(request):
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -44,9 +46,9 @@ def user_login(request):
         if user is not None:
             login(request, user)
             messages.success(request, 'Login Successfully')
-            return redirect('blog_index')
+            return redirect('index')
         else:
-            messages.success(request, 'Login credentials not valid')
+            messages.success(request, 'Login Error')
             return redirect('user_login')
     else:
         return render(request, "user/login.html")
@@ -56,3 +58,7 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('user_login')
+
+
+def user_index(request):
+    return render(request, 'user/index.html')
