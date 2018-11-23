@@ -1,7 +1,8 @@
 from distutils import version
-
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
+from .validators import validate_file_extension
 # Create your models here.
 
 TRAINING_TYPE = (
@@ -47,12 +48,12 @@ ACCURACY_THRESHOLD = (
 
 class Video(models.Model):
     ANSWER_CHOICE = (
-        (1, 'Answer_1'),
-        (2, 'Answer_2',),
-        (3, 'Answer_3',)
+        (1, '1'),
+        (2, '2',),
+        (3, '3',)
     )
 
-    path = models.CharField(blank=True, verbose_name="Path video", max_length=255)
+    path = models.FileField(blank=True, verbose_name="Upload video (mp4, mkv)", max_length=255, upload_to='videos/', validators=[validate_file_extension])
     title = models.TextField(blank=True, verbose_name="Title question")
     answer = models.IntegerField(choices=ANSWER_CHOICE, default=1)
     created_at = models.DateTimeField(auto_now_add=True)
