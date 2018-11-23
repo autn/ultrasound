@@ -3,5 +3,5 @@ venv
 .idea/
 *.pyc
 *.swp
-media/video/
+media/videos/
 servey/migrations/
