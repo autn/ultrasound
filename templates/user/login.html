@@ -17,8 +17,8 @@
                 <form method="post" action="{% url 'user_login' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="id_username" class="control-label">Username:</label>
-                        <input type="text" name="username" class="form-control" id="id_username" autocomplete="off">
+                        <label for="id_email" class="control-label">Email:</label>
+                        <input type="text" name="email" class="form-control" id="id_email" autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="id_password" class="control-label">Password:</label>

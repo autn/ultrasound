@@ -1,7 +1,29 @@
 {% extends 'partials/index.html' %}
 
 {% block content %}
-    <div class="flex">
-    <h3 class="">Select training type:</h3>
+    <div class="col-md-7">
+        <h3>{{ random_video.title }}</h3>
+        <video width="100%" controls>
+              <source src="{{ random_video.path.url }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
     </div>
+    <div class="col-md-5" style="padding-top: 42px;">
+        <form action="{% url 'answer_response' %}" method="post" class="form">
+            {% csrf_token %}
+            <input type="hidden" name="question_id" value="{{ random_video.id }}">
+            <ul style="list-style: none;">
+                {% for answerKey, answerValue in answers %}
+                <li>
+                    <label for="#{{ answerKey }}"><input class="answer" name="answer" data-true="{% if answerKey == random_video.answer %}{{ True }}{% else %}{{ False }}{% endif %}" type="radio" value="{{ answerKey }}" id="#{{ answerKey }}"> {{ answerValue }}</label>
+                </li>
+                {% endfor %}
+            </ul>
+            <h4><strong class="result"></strong></h4>
+            <button type="button" class="btn btn-info btn-block btn_answer" disabled>Answer</button>
+            <button type="button" onclick="$('.skip').val('true');Post($('.load') ,true)" style="display: none" class="next">Next question</button>
+            <button class="btn btn-info close-session test2" style="display: none" type="button">Close session</button>
+        </form>
+    </div>
+
 {% endblock %}

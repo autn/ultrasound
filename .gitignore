@@ -1,7 +1,7 @@
-*.sqlite3
+
 venv
 .idea/
 *.pyc
 *.swp
-media/videos/
+media/
 servey/migrations/

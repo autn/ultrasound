@@ -2,36 +2,87 @@ from django.shortcuts import render, redirect, render_to_response
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.template.defaultfilters import slugify
-from django.http import JsonResponse, HttpResponseRedirect
-from servey.models import TRAINING_TYPE, TRAINING_LEVEL, ACCURACY_THRESHOLD, CONFIDENCE_LEVEL, EXPERIENCE_NUMBER, UserInfo
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
+from servey.models import TRAINING_TYPE, TRAINING_LEVEL, ACCURACY_THRESHOLD, CONFIDENCE_LEVEL, EXPERIENCE_NUMBER, UserInfo, Video
 from servey.forms import UserInfoForm
+from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 # Create your views here.
 
 
 def index(request):
+    context = {
+        'training_type': TRAINING_TYPE,
+        'percent': ACCURACY_THRESHOLD
+    }
+
     if request.user.is_authenticated:
         user = get_object_or_404(User, pk=request.user.id)
-        user_info = UserInfo.objects.get(user__pk=user.id)
-        if user_info.training_type:
-            return redirect('take_the_test')
         if request.method == 'POST':
-            # user = get_object_or_404(User, pk=request.user.id)
-            user_info = UserInfo.objects.filter(user__pk=user.id).update(training_type=request.POST['training_type'])
+            UserInfo.objects.filter(user__pk=user.id).update(
+                training_type=request.POST['training_type'],
+                accuracy=request.POST['percent']
+            )
+            # user_info_video, created = UserInfo.objects.get_or_create(user_id=user.id)
+            # if created:
+            #     UserInfo.objects.filter(user__pk=user.id).update(
+            #         training_type=request.POST['training_type'],
+            #         accuracy=request.POST['percent']
+            #     )
             return redirect('take_the_test')
+
+        user_info = UserInfo.objects.filter(user__pk=user.id).first()
+        if user_info is not None:
+            return render(request, 'servey/index.html', context)
         else:
-            context = {
-                'training_type': TRAINING_TYPE,
-            }
+            return redirect('take_the_test')
+
+    else:
         return render(request, 'servey/index.html', context)
-    return render(request, 'servey/index.html')
 
 
 def take_the_test(request):
-    return render(request, 'servey/index.html')
+    if request.user.is_authenticated:
+        user = get_object_or_404(User, pk=request.user.id)
+        random_video = Video.objects.order_by('?').first()
+        answers = Video.ANSWER_CHOICE
+        context = {
+            'random_video': random_video,
+            'answers': answers
+        }
+        user_info = UserInfo.objects.filter(user__pk=user.id).first()
+        url = reverse('index')
+        if user_info.training_type is None:
+            return redirect('index')
+        return render(request, 'servey/do_test.html', context)
+    else:
+        return redirect('index')
+
+
+@csrf_exempt
+def answer_response(request):
+    question_id = request.POST['question_id']
+    answer = request.POST['answer']
+    check = Video.objects.filter(pk=question_id, answer=answer).first()
+    check_answer_true = Video.objects.filter(pk=question_id).first()
+    answer_true = check_answer_true.get_answer_display()
+
+    if check is not None:
+        data = {
+            "status": True,
+            "message": "Correct! Ejection fraction is " + answer_true
+        }
+        return JsonResponse(data, safe=False)
+
+    else:
+        data = {
+            "status": False,
+            "message": "Incorrect. Ejection fraction is " + answer_true
+        }
+        return JsonResponse(data, safe=False)
 
 
 # User register, login, logout
@@ -80,9 +131,14 @@ def user_login(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
     if request.method == 'POST':
-        username = request.POST['username']
+        email = request.POST['email']
         password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+        check_exits = User.objects.filter(email=email.lower())
+        if not check_exits:
+            messages.error(request, 'Email not exits')
+            return redirect('user_login')
+        check_username = User.objects.get(email=email.lower()).username
+        user = authenticate(request, username=check_username, password=password)
         if user is not None:
             login(request, user)
             messages.success(request, 'Login Successfully')

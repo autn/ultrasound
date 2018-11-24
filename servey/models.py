@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from .validators import validate_file_extension
+import datetime
 # Create your models here.
 
 TRAINING_TYPE = (
@@ -30,9 +31,9 @@ CONFIDENCE_LEVEL = (
 
 EXPERIENCE_NUMBER = (
  ('None', 'None'),
- ('1-20 scans interpreted', '1-20 scans interpreted'),
- ('21-100 scans interpreted', '21-100 scans interpreted'),
- ('> 100 scans interpreted', '> 100 scans interpreted'),
+ ('1-20', '1-20 scans interpreted'),
+ ('21-100', '21-100 scans interpreted'),
+ ('> 100', '> 100 scans interpreted'),
 )
 
 ACCURACY_THRESHOLD = (
@@ -45,9 +46,9 @@ ACCURACY_THRESHOLD = (
 
 class Video(models.Model):
     ANSWER_CHOICE = (
-        (1, '1'),
-        (2, '2',),
-        (3, '3',)
+        (1, 'Normal'),
+        (2, 'Moderately reduced',),
+        (3, 'Severely reduced',)
     )
 
     path = models.FileField(blank=True, verbose_name="Upload video (mp4, mkv)", max_length=255, upload_to='videos/', validators=[validate_file_extension])
@@ -82,5 +83,7 @@ class UserInfo(models.Model):
     training_level =  models.CharField(choices=TRAINING_LEVEL, max_length=255,  blank=True, null=True)
     experience = models.CharField(choices=EXPERIENCE_NUMBER, blank=True, null=True, max_length=255)
     confidence_level = models.CharField(blank=True, choices=CONFIDENCE_LEVEL, max_length=255, null=True)
+    date = models.DateTimeField(default=datetime.datetime.utcnow, blank=True)
+    close = models.BooleanField(default=False, verbose_name="Test is close?", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

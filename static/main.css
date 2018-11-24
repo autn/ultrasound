@@ -14,13 +14,20 @@ h3{
     margin-top: 6px;
     margin-right: 10px;
 }
-.flex{
-    display: flex;
-    justify-content: flex-start;
-}
+/*.flex{*/
+    /*display: flex;*/
+    /*justify-content: flex-start;*/
+/*}*/
 
 .alert-error{
     color: #a94442;
     background-color: #f2dede;
     border-color: #ebccd1;
+}
+
+ul li{
+    list-style-type: none;
+}
+.percent{
+    display: none;
 }
