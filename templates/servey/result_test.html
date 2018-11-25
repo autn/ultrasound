@@ -1,0 +1,14 @@
+{% extends 'partials/index.html' %}
+
+{% block content %}
+
+    {% if request.user.is_authenticated %}
+        <div class="text-center">
+            <h3><strong>Total question: {{ total_views }}</strong></h3>
+            <h3><strong>Overall accuracy: {{ accuracy }} %</strong></h3>
+        </div>
+    {% else %}
+        <h3 class="text-center">Please <a href="{% url 'user_login' %}">Login</a> to take the test</h3>
+    {% endif %}
+
+{% endblock %}

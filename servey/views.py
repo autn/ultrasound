@@ -6,10 +6,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.template.defaultfilters import slugify
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
-from servey.models import TRAINING_TYPE, TRAINING_LEVEL, ACCURACY_THRESHOLD, CONFIDENCE_LEVEL, EXPERIENCE_NUMBER, UserInfo, Video
+from servey.models import TRAINING_TYPE, TRAINING_LEVEL, ACCURACY_THRESHOLD, CONFIDENCE_LEVEL, EXPERIENCE_NUMBER, UserInfo, Video, Result, ResultDetail
 from servey.forms import UserInfoForm
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
+from decimal import Decimal
+from django.conf import settings
 # Create your views here.
 
 
@@ -22,20 +24,23 @@ def index(request):
     if request.user.is_authenticated:
         user = get_object_or_404(User, pk=request.user.id)
         if request.method == 'POST':
-            UserInfo.objects.filter(user__pk=user.id).update(
-                training_type=request.POST['training_type'],
-                accuracy=request.POST['percent']
-            )
-            # user_info_video, created = UserInfo.objects.get_or_create(user_id=user.id)
-            # if created:
-            #     UserInfo.objects.filter(user__pk=user.id).update(
-            #         training_type=request.POST['training_type'],
-            #         accuracy=request.POST['percent']
-            #     )
+            # UserInfo.objects.filter(user__pk=user.id).update(
+            #     training_type=request.POST['training_type'],
+            #     accuracy=request.POST['percent']
+            # )
+            print(request.POST)
+            user_exits = Result.objects.filter(user=user)
+            if not user_exits:
+                Result.objects.create(user=user,training_type=request.POST['training_type'],accuracy=request.POST['percent'])
+            else:
+                Result.objects.filter(user=user).update(
+                    training_type=request.POST['training_type'],
+                    accuracy=request.POST['percent']
+                )
             return redirect('take_the_test')
 
-        user_info = UserInfo.objects.filter(user__pk=user.id).first()
-        if user_info is not None:
+        user_info = Result.objects.filter(user=user, training_type__isnull=False, close=False).first()
+        if user_info is None:
             return render(request, 'servey/index.html', context)
         else:
             return redirect('take_the_test')
@@ -53,9 +58,9 @@ def take_the_test(request):
             'random_video': random_video,
             'answers': answers
         }
-        user_info = UserInfo.objects.filter(user__pk=user.id).first()
+        user_info = Result.objects.filter(user=user, training_type__isnull=False).first()
         url = reverse('index')
-        if user_info.training_type is None:
+        if user_info is None:
             return redirect('index')
         return render(request, 'servey/do_test.html', context)
     else:
@@ -70,6 +75,9 @@ def answer_response(request):
     check_answer_true = Video.objects.filter(pk=question_id).first()
     answer_true = check_answer_true.get_answer_display()
 
+    result = Result.objects.create(user_id=request.user.id, close=False)
+    result_detail = ResultDetail.objects.create(answer=answer, result=result, video_id=question_id)
+
     if check is not None:
         data = {
             "status": True,
@@ -83,6 +91,52 @@ def answer_response(request):
             "message": "Incorrect. Ejection fraction is " + answer_true
         }
         return JsonResponse(data, safe=False)
+
+
+@login_required(login_url=settings.LOGIN_URL)
+def close_test(request):
+    exits_user = Result.objects.filter(user=request.user).first()
+    data = {"status": False, "messages": "Test has already been closed"}
+
+    if request.POST and exits_user is not None:
+        result_user = Result.objects.filter(user=request.user, close=False).get()
+
+        if result_user is not None:
+            Result.objects.filter(user=request.user).update(close=True)
+            return redirect('result_test')
+        else:
+            return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse(data, safe=False)
+
+
+@login_required(login_url=settings.LOGIN_URL)
+def result_test(request):
+    result = Result.objects.filter(user=request.user, close=True).order_by('-updated_at').first()
+    if result is not None:
+        # context = {}
+        # count_question = ResultDetail.objects.filter(result__user=request.user).count()
+        # total_answer = ResultDetail.objects.filter(result__user=request.user)
+        #
+        # context['true'] = 0
+        # context['false'] = 0
+        # for query_answer in total_answer:
+        #     video = query_answer.video.answer
+        #     answer_result = query_answer.answer
+        #     if video == answer_result:
+        #         context['true'] += 1
+        #     else:
+        #         context['false'] += 1
+        #
+        # accuracy = Decimal(context['true'] * 100 / count_question)
+        # context = {
+        #     "total_views": count_question,
+        #     "accuracy": accuracy
+        # }
+        context = cacu_accuracy(request)
+        return render(request, 'servey/result_test.html', context)
+    else:
+        return JsonResponse({"status": False, "messages": "Test has not been closed"}, safe=False)
 
 
 # User register, login, logout
@@ -150,8 +204,40 @@ def user_login(request):
         return render(request, "user/login.html")
 
 
-@login_required(login_url='/login')
+@login_required(login_url=settings.LOGIN_URL)
 def user_logout(request):
     logout(request)
     return redirect('index')
 
+
+@login_required(login_url=settings.LOGIN_URL)
+def user_profile(request):
+    if request.user.is_authenticated:
+        result_detail = Result.objects.filter(user=request.user).all()
+        context = cacu_accuracy(request)
+        return render(request, 'user/profile.html', {"results": result_detail, "total_views" : context['total_views'], "accuracy": context['accuracy']})
+    else:
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def cacu_accuracy(request):
+    context = {}
+    count_question = ResultDetail.objects.filter(result__user=request.user).count()
+    total_answer = ResultDetail.objects.filter(result__user=request.user)
+
+    context['true'] = 0
+    context['false'] = 0
+    for query_answer in total_answer:
+        video = query_answer.video.answer
+        answer_result = query_answer.answer
+        if video == answer_result:
+            context['true'] += 1
+        else:
+            context['false'] += 1
+
+    accuracy = Decimal(context['true'] * 100 / count_question)
+    context = {
+        "total_views": count_question,
+        "accuracy": accuracy
+    }
+    return context

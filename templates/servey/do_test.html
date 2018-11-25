@@ -21,8 +21,11 @@
             </ul>
             <h4><strong class="result"></strong></h4>
             <button type="button" class="btn btn-info btn-block btn_answer" disabled>Answer</button>
-            <button type="button" onclick="$('.skip').val('true');Post($('.load') ,true)" style="display: none" class="next">Next question</button>
-            <button class="btn btn-info close-session test2" style="display: none" type="button">Close session</button>
+        </form>
+        <form action="{%  url 'close_test' %}" method="POST">
+            {% csrf_token %}
+            <button type="button" style="display: none" class="btn btn-primary next_video">Next question</button>
+            <button class="btn btn-success close_session" style="display: none" type="submit" >Close session</button>
         </form>
     </div>
 

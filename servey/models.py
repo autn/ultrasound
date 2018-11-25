@@ -63,6 +63,10 @@ class Video(models.Model):
 
 class Result(models.Model):
     user = models.ForeignKey(User, related_name='user_result', on_delete=models.CASCADE)
+    training_type = models.CharField(choices=TRAINING_TYPE, blank=True, null=True, max_length=255)
+    accuracy = models.CharField(max_length=255, choices=ACCURACY_THRESHOLD, blank=True, null=True)
+    date = models.DateTimeField(default=datetime.datetime.utcnow, blank=True)
+    close = models.BooleanField(default=False, verbose_name="Test is close?", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -77,13 +81,12 @@ class ResultDetail(models.Model):
 
 class UserInfo(models.Model):
     user = models.OneToOneField(User, related_name='user_info', on_delete=models.CASCADE)
-    training_type = models.CharField(choices=TRAINING_TYPE, blank=True, null=True, max_length=255)
-    accuracy = models.CharField(max_length=255, choices=ACCURACY_THRESHOLD, blank=True, null=True)
+    # training_type = models.CharField(choices=TRAINING_TYPE, blank=True, null=True, max_length=255)
+    # accuracy = models.CharField(max_length=255, choices=ACCURACY_THRESHOLD, blank=True, null=True)
     institution = models.TextField(blank=True, null=True, max_length=255)
     training_level =  models.CharField(choices=TRAINING_LEVEL, max_length=255,  blank=True, null=True)
     experience = models.CharField(choices=EXPERIENCE_NUMBER, blank=True, null=True, max_length=255)
     confidence_level = models.CharField(blank=True, choices=CONFIDENCE_LEVEL, max_length=255, null=True)
-    date = models.DateTimeField(default=datetime.datetime.utcnow, blank=True)
-    close = models.BooleanField(default=False, verbose_name="Test is close?", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+

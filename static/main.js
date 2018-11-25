@@ -63,7 +63,10 @@ $(document).ready(function () {
                 console.log(data)
                 // if (data.status == True)
 
-                $(".result").html(data.message)
+                $(".result").html(data.message);
+                $(".btn_answer").hide();
+                $(".next_video").show();
+                $(".close_session").show();
             }
         })
     })

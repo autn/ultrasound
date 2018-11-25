@@ -34,7 +34,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         {% if request.user.is_authenticated %}
-                            <li><a href="">Profile</a></li>
+                            <li><a href="{% url 'user_profile' %}">Profile</a></li>
                             <li><a href="{% url 'user_logout' %}">Logout</a></li>
                         {% else %}
                             <li><a href="{% url 'user_login' %}">Login</a></li>
