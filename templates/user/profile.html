@@ -12,7 +12,6 @@
                         <th class="text-center">Date</th>
                         <th class="text-center">Total Question</th>
                         <th class="text-center">Overall accuracy</th>
-                        <th class="text-center">Close</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -21,7 +20,6 @@
                             <td class="text-center"><strong>{{ result.date|date }}</strong></td>
                             <td class="text-center"><strong>{{ total_views }}</strong></td>
                             <td class="text-center"><strong>{{ accuracy }}</strong> %</td>
-                            <td class="text-center"><strong>{{ result.close }}</strong></td>
                         </tr>
                     {% endfor %}
                     </tbody>

@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from decimal import Decimal
 from django.conf import settings
+from django.db.models import Q
 # Create your views here.
 
 
@@ -28,18 +29,17 @@ def index(request):
             #     training_type=request.POST['training_type'],
             #     accuracy=request.POST['percent']
             # )
-            print(request.POST)
-            user_exits = Result.objects.filter(user=user)
+            user_exits = UserInfo.objects.filter(user=user).exists()
             if not user_exits:
-                Result.objects.create(user=user,training_type=request.POST['training_type'],accuracy=request.POST['percent'])
+                UserInfo.objects.create(user=user,training_type=request.POST['training_type'],accuracy=request.POST['percent'])
             else:
-                Result.objects.filter(user=user).update(
+                UserInfo.objects.filter(user=user).update(
                     training_type=request.POST['training_type'],
                     accuracy=request.POST['percent']
                 )
             return redirect('take_the_test')
 
-        user_info = Result.objects.filter(user=user, training_type__isnull=False, close=False).first()
+        user_info = UserInfo.objects.filter(user=user, training_type__isnull=False).first()
         if user_info is None:
             return render(request, 'servey/index.html', context)
         else:
@@ -53,12 +53,15 @@ def take_the_test(request):
     if request.user.is_authenticated:
         user = get_object_or_404(User, pk=request.user.id)
         random_video = Video.objects.order_by('?').first()
+        count_video = Video.objects.count()
+
+        exits_video = ResultDetail.objects.filter(result__user=user)
         answers = Video.ANSWER_CHOICE
         context = {
             'random_video': random_video,
             'answers': answers
         }
-        user_info = Result.objects.filter(user=user, training_type__isnull=False).first()
+        user_info = UserInfo.objects.filter(user=user, training_type__isnull=False).first()
         url = reverse('index')
         if user_info is None:
             return redirect('index')
@@ -75,8 +78,11 @@ def answer_response(request):
     check_answer_true = Video.objects.filter(pk=question_id).first()
     answer_true = check_answer_true.get_answer_display()
 
-    result = Result.objects.create(user_id=request.user.id, close=False)
-    result_detail = ResultDetail.objects.create(answer=answer, result=result, video_id=question_id)
+    exits_user = Result.objects.filter(user=request.user, close=False).order_by('-updated_at').first()
+    if not exits_user:
+        result = Result.objects.create(user_id=request.user.id, close=False)
+        ResultDetail.objects.create(answer=answer, result=result, video_id=question_id)
+    ResultDetail.objects.create(answer=answer, result=exits_user, video_id=question_id)
 
     if check is not None:
         data = {
@@ -95,7 +101,7 @@ def answer_response(request):
 
 @login_required(login_url=settings.LOGIN_URL)
 def close_test(request):
-    exits_user = Result.objects.filter(user=request.user).first()
+    exits_user = Result.objects.filter(user=request.user).order_by('-updated_at').first()
     data = {"status": False, "messages": "Test has already been closed"}
 
     if request.POST and exits_user is not None:
