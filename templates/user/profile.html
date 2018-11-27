@@ -3,29 +3,41 @@
     <div class="col-md-12" style="padding-right: 0px;padding-left: 0px;">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <h3 class="panel-title">User Profile</h3>
+                <h3 class="panel-title">User Result</h3>
             </div>
             <div class="panel-body">
+            {% if results %}
                 <table class="table table-bordered table-hover">
                     <thead>
                     <tr>
                         <th class="text-center">Date</th>
-                        <th class="text-center">Total Question</th>
-                        <th class="text-center">Overall accuracy</th>
+                        <th class="text-center">Video viewed</th>
+                        <th class="text-center">Overall accuracy (%)</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for result in results %}
+                    {% for key, values in results %}
+{#                            <td class="text-center"><strong>{{ result.date|date }}</strong></td>#}
+{#                        <td class="text-center"><strong>{{ values }}</strong></td>#}
+
                         <tr>
-                            <td class="text-center"><strong>{{ result.date|date }}</strong></td>
-                            <td class="text-center"><strong>{{ total_views }}</strong></td>
-                            <td class="text-center"><strong>{{ accuracy }}</strong> %</td>
+                            {% for key, value in values.items %}
+                                <td class="text-center">{{ value }}</td>
+                            {% endfor %}
                         </tr>
+{#                        #}
+{##}
+{#                            <td class="text-center"><strong>{{ accuracy }}</strong> %</td>#}
+{#                            <td class="text-center"><strong>{{ forloop.counter }}</strong></td>#}
+
                     {% endfor %}
                     </tbody>
                 </table>
-
+            {% else %}
+                <h3 class="text-center">No result</h3>
+            {% endif %}
             </div>
+            <div class="panel-footer"><h3 class="panel-title">Total question: {{ count_questions }}</h3></div>
         </div>
     </div>
 {% endblock %}

@@ -65,10 +65,22 @@ $(document).ready(function () {
 
                 $(".result").html(data.message);
                 $(".btn_answer").hide();
-                $(".next_video").show();
-                $(".close_session").show();
+
+                if (data.end_session == false){
+                    $(".next_video").show();
+                    $(".close_session").show();
+                }else{
+                    console.log("AAAAAA");
+                    $("#id_form").show()
+                    // $(".another_session").show();
+                    // $(".see_result").show();
+                }
             }
         })
+    })
+
+    $(".next_video").click(function () {
+        location.reload();
     })
 });
 

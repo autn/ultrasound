@@ -1,32 +1,48 @@
 {% extends 'partials/index.html' %}
 
 {% block content %}
-    <div class="col-md-7">
-        <h3>{{ random_video.title }}</h3>
-        <video width="100%" controls>
-              <source src="{{ random_video.path.url }}" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
-    <div class="col-md-5" style="padding-top: 42px;">
-        <form action="{% url 'answer_response' %}" method="post" class="form">
-            {% csrf_token %}
-            <input type="hidden" name="question_id" value="{{ random_video.id }}">
-            <ul style="list-style: none;">
-                {% for answerKey, answerValue in answers %}
-                <li>
-                    <label for="#{{ answerKey }}"><input class="answer" name="answer" data-true="{% if answerKey == random_video.answer %}{{ True }}{% else %}{{ False }}{% endif %}" type="radio" value="{{ answerKey }}" id="#{{ answerKey }}"> {{ answerValue }}</label>
-                </li>
-                {% endfor %}
-            </ul>
-            <h4><strong class="result"></strong></h4>
-            <button type="button" class="btn btn-info btn-block btn_answer" disabled>Answer</button>
-        </form>
-        <form action="{%  url 'close_test' %}" method="POST">
-            {% csrf_token %}
-            <button type="button" style="display: none" class="btn btn-primary next_video">Next question</button>
-            <button class="btn btn-success close_session" style="display: none" type="submit" >Stop session</button>
-        </form>
-    </div>
+    {% if end_session == True %}
+        <div class="col-md-10 text-center">
+            <form action="{% url 'start_new_session' %}" method="POST" class="form">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary another_session">Start another session</button>
+                <a href="{% url 'user_profile' %}" class="btn btn-success see_result">See result</a>
+            </form>
+        </div>
+    {% else %}
+        <div class="col-md-7">
+            <h3>{{ random_video.title }}</h3>
+            <video width="100%" controls>
+                  <source src="{{ random_video.path.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="col-md-5" style="padding-top: 42px;">
+            <form action="{% url 'answer_response' %}" method="post" class="form">
+                {% csrf_token %}
+                <input type="hidden" name="question_id" value="{{ random_video.id }}">
+                <ul style="list-style: none;">
+                    {% for answerKey, answerValue in answers %}
+                    <li>
+                        <label for="#{{ answerKey }}"><input class="answer" name="answer" data-true="{% if answerKey == random_video.answer %}{{ True }}{% else %}{{ False }}{% endif %}" type="radio" value="{{ answerKey }}" id="#{{ answerKey }}"> {{ answerValue }}</label>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <h4><strong class="result"></strong></h4>
+                <button type="button" class="btn btn-info btn-block btn_answer" disabled>Answer</button>
+            </form>
+{#            <a href="{% url 'close_test' %}" class="btn btn-success close_session" style="display: none" >End training session</a>#}
+            <form action="{%  url 'close_test' %}" method="POST">
+                {% csrf_token %}
+                <button type="button" style="display: none" class="btn btn-primary next_video">View next clip</button>
+                <button class="btn btn-success close_session" style="display: none" type="submit" >End training session</button>
+            </form>
+            <form action="{% url 'close_test' %}" method="POST" id="id_form" style="display: none">
+                {% csrf_token %}
+{#                <a href="{% url 'user_profile' %}" class="btn btn-success see_result">End training session</a>#}
+                <button class="btn btn-success close_session" type="submit" >End training session</button>
+            </form>
+        </div>
+    {% endif %}
 
 {% endblock %}

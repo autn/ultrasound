@@ -7,7 +7,7 @@ urlpatterns = [
     url(r'^answer_response$', views.answer_response, name='answer_response'),
     url(r'^close_session$', views.close_test, name='close_test'),
     url(r'^result_test$', views.result_test, name='result_test'),
-#     url(r'^(?P<pk>\d+)/delete', views.BlogDelete, name='blog_delete'),
+    url(r'^start_new_session', views.start_new_session, name='start_new_session'),
 #
 #login
     url(r'^register', views.user_register, name='user_register'),

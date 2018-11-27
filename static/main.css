@@ -31,3 +31,7 @@ ul li{
 .percent{
     display: none;
 }
+
+#id_form{
+    display: none;
+}

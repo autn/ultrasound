@@ -4,7 +4,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.template.defaultfilters import slugify
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from servey.models import TRAINING_TYPE, TRAINING_LEVEL, ACCURACY_THRESHOLD, CONFIDENCE_LEVEL, EXPERIENCE_NUMBER, UserInfo, Video, Result, ResultDetail
 from servey.forms import UserInfoForm
@@ -12,59 +11,83 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from decimal import Decimal
 from django.conf import settings
-from django.db.models import Q
+
 # Create your views here.
 
 
 def index(request):
-    context = {
-        'training_type': TRAINING_TYPE,
-        'percent': ACCURACY_THRESHOLD
-    }
-
     if request.user.is_authenticated:
         user = get_object_or_404(User, pk=request.user.id)
+
+        end_session = False
+        all_videos = Video.objects.values_list('id', flat=True)
+        latest_result = Result.objects.filter(user=user).order_by('-created_at').first()
+        if latest_result is not None:
+            exits_video = ResultDetail.objects.filter(result=latest_result).values_list('video_id', flat=True)
+            diff = set(all_videos) == set(exits_video)
+            if diff:
+                end_session = True
+
         if request.method == 'POST':
             # UserInfo.objects.filter(user__pk=user.id).update(
             #     training_type=request.POST['training_type'],
             #     accuracy=request.POST['percent']
             # )
-            user_exits = UserInfo.objects.filter(user=user).exists()
+            user_exits = Result.objects.filter(user=user, close=False).exists()
+
             if not user_exits:
-                UserInfo.objects.create(user=user,training_type=request.POST['training_type'],accuracy=request.POST['percent'])
+                Result.objects.create(user=user,training_type=request.POST['training_type'],accuracy=request.POST['percent'], close=False)
             else:
-                UserInfo.objects.filter(user=user).update(
+                Result.objects.filter(user=user).update(
                     training_type=request.POST['training_type'],
                     accuracy=request.POST['percent']
                 )
             return redirect('take_the_test')
 
-        user_info = UserInfo.objects.filter(user=user, training_type__isnull=False).first()
+        user_info = Result.objects.filter(user=user, close=False).order_by('-created_at').first()
+        context = {
+            'training_type': TRAINING_TYPE,
+            'percent': ACCURACY_THRESHOLD,
+            "end_session":  end_session
+        }
+
+        print(user_info)
         if user_info is None:
             return render(request, 'servey/index.html', context)
         else:
             return redirect('take_the_test')
 
     else:
-        return render(request, 'servey/index.html', context)
+        return render(request, 'servey/index.html')
 
 
 def take_the_test(request):
     if request.user.is_authenticated:
+        end_session = False
         user = get_object_or_404(User, pk=request.user.id)
-        random_video = Video.objects.order_by('?').first()
-        count_video = Video.objects.count()
 
-        exits_video = ResultDetail.objects.filter(result__user=user)
+        is_close = Result.objects.filter(user=user, training_type__isnull=False, close=False).order_by('created_at').first()
+        if is_close is None:
+            return redirect('index')
+
+        all_videos = Video.objects.values_list('id', flat=True)
+        latest_result = Result.objects.filter(user=user).order_by('-created_at').first()
+        if latest_result is not None:
+            exits_video = ResultDetail.objects.filter(result=latest_result).values_list('video_id', flat=True)
+            diff = set(all_videos) == set(exits_video)
+            if diff:
+                end_session = True
+            random_video = Video.objects.exclude(id__in=exits_video).order_by('?').first()
+        else:
+            random_video = Video.objects.order_by('?').first()
+
         answers = Video.ANSWER_CHOICE
         context = {
             'random_video': random_video,
-            'answers': answers
+            'answers': answers,
+            'end_session': end_session
         }
-        user_info = UserInfo.objects.filter(user=user, training_type__isnull=False).first()
-        url = reverse('index')
-        if user_info is None:
-            return redirect('index')
+
         return render(request, 'servey/do_test.html', context)
     else:
         return redirect('index')
@@ -78,23 +101,41 @@ def answer_response(request):
     check_answer_true = Video.objects.filter(pk=question_id).first()
     answer_true = check_answer_true.get_answer_display()
 
-    exits_user = Result.objects.filter(user=request.user, close=False).order_by('-updated_at').first()
+    exits_user = Result.objects.filter(user=request.user).order_by('-updated_at').first()
     if not exits_user:
-        result = Result.objects.create(user_id=request.user.id, close=False)
+        result = Result.objects.create(user_id=request.user.id)
         ResultDetail.objects.create(answer=answer, result=result, video_id=question_id)
-    ResultDetail.objects.create(answer=answer, result=exits_user, video_id=question_id)
+        check_15 = ResultDetail.objects.filter(result=result)
+    else:
+        ResultDetail.objects.create(answer=answer, result=exits_user, video_id=question_id)
+        check_15 = ResultDetail.objects.filter(result=exits_user).count()
+
+    # if check_15 == 15:
+
+
+    end_session = False
+    all_videos = Video.objects.values_list('id', flat=True)
+    latest_result = Result.objects.filter(user=request.user).order_by('-created_at').first()
+    if latest_result is not None:
+        exits_video = ResultDetail.objects.filter(result=latest_result).values_list('video_id', flat=True)
+        diff = set(all_videos) == set(exits_video)
+        if diff:
+            end_session = True
+
 
     if check is not None:
         data = {
             "status": True,
-            "message": "Correct! Ejection fraction is " + answer_true
+            "message": "Correct! Ejection fraction is " + answer_true,
+            "end_session": end_session
         }
         return JsonResponse(data, safe=False)
 
     else:
         data = {
             "status": False,
-            "message": "Incorrect. Ejection fraction is " + answer_true
+            "message": "Incorrect. Ejection fraction is " + answer_true,
+            "end_session": end_session
         }
         return JsonResponse(data, safe=False)
 
@@ -105,10 +146,12 @@ def close_test(request):
     data = {"status": False, "messages": "Test has already been closed"}
 
     if request.POST and exits_user is not None:
-        result_user = Result.objects.filter(user=request.user, close=False).get()
-
+        result_user = Result.objects.filter(user=request.user, close=True)
+        print(result_user)
         if result_user is not None:
-            Result.objects.filter(user=request.user).update(close=True)
+            close_result = Result.objects.filter(user=request.user).order_by('-updated_at').first()
+            close_result.close = True
+            close_result.save()
             return redirect('result_test')
         else:
             return JsonResponse(data, safe=False)
@@ -139,7 +182,7 @@ def result_test(request):
         #     "total_views": count_question,
         #     "accuracy": accuracy
         # }
-        context = cacu_accuracy(request)
+        context = count_accuracy(request, result)
         return render(request, 'servey/result_test.html', context)
     else:
         return JsonResponse({"status": False, "messages": "Test has not been closed"}, safe=False)
@@ -219,31 +262,47 @@ def user_logout(request):
 @login_required(login_url=settings.LOGIN_URL)
 def user_profile(request):
     if request.user.is_authenticated:
-        result_detail = Result.objects.filter(user=request.user).all()
-        context = cacu_accuracy(request)
-        return render(request, 'user/profile.html', {"results": result_detail, "total_views" : context['total_views'], "accuracy": context['accuracy']})
+        context = {}
+        count_questions = Video.objects.count()
+        count_results = Result.objects.filter(user=request.user).all()
+        for result in count_results:
+            context[result.id]= count_accuracy(request, result)
+
+        return render(request, 'user/profile.html', {"count_results": count_results, "results" : context.items(), "count_questions": count_questions})
     else:
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
-def cacu_accuracy(request):
+def count_accuracy(request, result):
     context = {}
-    count_question = ResultDetail.objects.filter(result__user=request.user).count()
-    total_answer = ResultDetail.objects.filter(result__user=request.user)
+    check = ResultDetail.objects.filter(result=result)
+    if check is not None:
+        count_question = ResultDetail.objects.filter(result=result).count()
+        total_answer = ResultDetail.objects.filter(result=result)
 
-    context['true'] = 0
-    context['false'] = 0
-    for query_answer in total_answer:
-        video = query_answer.video.answer
-        answer_result = query_answer.answer
-        if video == answer_result:
-            context['true'] += 1
-        else:
-            context['false'] += 1
+        context['true'] = 0
+        context['false'] = 0
+        for query_answer in total_answer:
+            video = query_answer.video.answer
+            answer_result = query_answer.answer
+            if video == answer_result:
+                context['true'] += 1
+            else:
+                context['false'] += 1
 
-    accuracy = Decimal(context['true'] * 100 / count_question)
-    context = {
-        "total_views": count_question,
-        "accuracy": accuracy
-    }
-    return context
+        accuracy = context['true'] * 100 / count_question
+        result_detail = ResultDetail.objects.filter(result=result).values_list('video_id').count()
+        context = {
+            "date": result.date,
+            "total_video": result_detail,
+            "accuracy": accuracy,
+        }
+        return context
+    else:
+        return context
+
+
+def start_new_session(request):
+    if request.method == "POST":
+        Result.objects.create(user_id=request.user.id)
+        return redirect('take_the_test')
