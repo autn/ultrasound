@@ -51,11 +51,12 @@ def index(request):
             "end_session":  end_session
         }
 
-        print(user_info)
         if user_info is None:
             return render(request, 'servey/index.html', context)
         else:
-            return redirect('take_the_test')
+            question_user = True
+            return render(request, 'servey/index.html',{"question_user": question_user})
+            # return redirect('take_the_test')
 
     else:
         return render(request, 'servey/index.html')
