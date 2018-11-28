@@ -42,6 +42,32 @@
 {#                <a href="{% url 'user_profile' %}" class="btn btn-success see_result">End training session</a>#}
                 <button class="btn btn-success close_session" type="submit" >End training session</button>
             </form>
+
+            <div class="panel panel-success congratulation text-center" style="display: none">
+                <div class="panel-heading">
+                    <h3 class="panel-title ">Congratulation.</h3>
+                </div>
+                <div class="panel-body">
+                    <p><strong class="congratulation_text"></strong></p>
+                    <p><strong>Overall accuracy: </strong><strong class="overall_accuracy"></strong></p>
+                    <p><strong>Number of clips viewed: </strong><strong class="video_viewed"></strong></p>
+                </div>
+                <div class="panle-footer" style="padding-bottom: 47px;">
+                    <div class="col-md-6">
+                        <form action="{%  url 'close_test' %}" method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-success close_session" type="submit" >End trainer</button>
+                        </form>
+                    </div>
+                   <div class="col-md-6">
+                        <form action="{% url 'start_new_session' %}" method="POST" class="form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary another_session">Start another session</button>
+                        </form>
+                   </div>
+                </div>
+            </div>
+
         </div>
     {% endif %}
 

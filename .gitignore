@@ -1,7 +1,7 @@
 
-venv
+#venv
 .idea/
 *.pyc
 *.swp
-media/
+#media/
 servey/migrations/
