@@ -62,22 +62,28 @@ $(document).ready(function () {
             success: function (data) {
                 console.log(data)
                 // if (data.status == True)
-
                 $(".result").html(data.message);
                 $(".btn_answer").hide();
 
-                if (data.end_session == false){
-                    $(".next_video").show();
-                    $(".close_session").show();
-                }else{
-                    console.log("AAAAAA");
-                    $("#id_form").show()
-                    // $(".another_session").show();
-                    // $(".see_result").show();
+                if (data.congratulation){
+                    $(".congratulation").show()
+                    $(".congratulation_text").text(data.congratulation)
+                    $(".video_viewed").text(data.video_viewed)
+                    $(".overall_accuracy").text(data.overall_accuracy)
+                }else {
+                    if (data.end_session == false){
+                        $(".next_video").show();
+                        $(".close_session").show();
+                    }else{
+                        $("#id_form").show()
+                        // $(".another_session").show();
+                        // $(".see_result").show();
+                    }
                 }
+
             }
         })
-    })
+    });
 
     $(".next_video").click(function () {
         location.reload();

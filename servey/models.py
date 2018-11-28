@@ -70,6 +70,28 @@ class Result(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # def video_viewed(self):
+    #     # accuracy = Result.objects.all()
+    #     # viewed = None
+    #     # for item in accuracy:
+    #     #     viewed[item.user_id] = ResultDetail.objects.filter(result=11).count()
+    #
+    #     return ResultDetail.objects.filter(result=11).count()
+    #
+    # def video(self, obj):
+    #     return ", ".join([
+    #         child.name for child in obj.children.all()
+    #     ])
+    #
+    # video.short_description = "video"
+
+        # return self.training_type
+    #
+    # @property
+    # def accuracy_test(self):
+    #     print(self.count_video_viewed(self))
+    #     return self.count_video_viewed(self)
+
 
 class ResultDetail(models.Model):
     result = models.ForeignKey(Result, on_delete=models.CASCADE, null=True, related_name='result_detail',)
@@ -88,3 +110,5 @@ class UserInfo(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.user
