@@ -3,6 +3,8 @@ import django.contrib.auth.admin
 from django.contrib.auth.models import User, Group
 from django.contrib import auth
 from django.contrib.auth.admin import UserAdmin
+from django.template import context
+
 from servey.models import Video, Result, ResultDetail, UserInfo
 from servey.views import count_accuracy
 # Register your models here.
@@ -33,33 +35,54 @@ class VideoAdmin(admin.ModelAdmin):
 class ResultAdmin(admin.ModelAdmin):
     def video_count(self, obj):
         return obj.result_detail.count()
-    video_count.short_description = "Clips viewed"
-    list_display = ['user', 'video_count', 'accuracy']
-    list_filter = ['user', 'accuracy']
+    video_count.short_description = "Correct Anwser / Clips viewed"
+    list_display = ['user', 'video_count', 'training_type', 'accuracy']
+    list_filter = ['accuracy', 'training_type']
     search_fields = ['user']
+    change_list_template = 'admin/servey/result_change_list.html'
 
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['some_var'] = 'This is what I want to show'
+        return super(ResultAdmin, self).changelist_view(request, extra_context=extra_context)
 # admin.site.unregister(auth.models.User)
 admin.site.unregister(Group)
 
-admin.site.site_header="Ultrasound trainer"
-admin.site.site_title = "Ultrasound"
-admin.site.index_title = "Ultrasound Admin"
+# admin.site.site_header="Ultrasound trainer"
+# admin.site.site_title = "Ultrasound"
+# admin.site.index_title = "Ultrasound Admin"
 
 
 @admin.register(UserInfo)
 class UserInfoAdmin(admin.ModelAdmin):
     def sessions_completed(self,obj):
-        users = User.objects.all()
-        return Result.objects.filter(user__in=users, close=True).count()
+        # print(obj)
+        # return obj.user_result.count()
+        # print(count_results)
+        # pass
+        # # return count_results.user_result.count()
+        # for user in count_results:
+        #     context[user.id] = Result.objects.filter(user_id=user.id, close=True).count()
+        # return context.values()
+        return Result.objects.filter(user__in=[obj.user]).count()
+
+
 
     def clips_viewed(self,obj):
-        users = User.objects.all()
-        return ResultDetail.objects.filter(result__user__in=users).count()
+        # pass
+        # context = {}
+        # users = User.objects.all()
+        # for result in count:
+        #     context[result] = count_accuracy(result)
+        # return context.values()
+
+        # return obj.result_detail.count()
+        return ResultDetail.objects.filter(result__user__in=[obj.user]).count()
 
     def accuracy_most_recent(self,obj):
         context = {}
         users = User.objects.all()
-        count_results = Result.objects.filter(user__in=users).all()
+        count_results = Result.objects.filter(user__in=[obj.user]).all()
         for result in count_results:
             context[result.id] = count_accuracy(result)
 

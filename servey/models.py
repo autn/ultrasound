@@ -70,6 +70,8 @@ class Result(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = 'Session Result'
     # def video_viewed(self):
     #     # accuracy = Result.objects.all()
     #     # viewed = None
@@ -112,3 +114,6 @@ class UserInfo(models.Model):
 
     def __str__(self):
         return self.user
+
+    class Meta:
+        verbose_name = 'User Info'
