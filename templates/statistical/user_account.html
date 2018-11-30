@@ -1,6 +1,25 @@
 {% extends 'statistical/index.html' %}
 {% block main %}
     <div class="col-md-10">
-        <h1>ACCOUNT</h1>
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th class="text-center">USER</th>
+                <th class="text-center">SESSIONS COMPLETED</th>
+                <th class="text-center">CLIPS VIEWED</th>
+                <th class="text-center">ACCURACY MOST RECENT</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr class="text-center">
+                    <td>{{ user.get_user }}</td>
+                    <td>{{ user.sessions_completed }}</td>
+                    <td>{{ user.clips_viewed }}</td>
+                    <td>{{ user.accuracy_most_recent }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 {% endblock %}

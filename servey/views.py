@@ -254,8 +254,8 @@ def user_profile(request):
     else:
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
-# THONG KE
 
+# THONG KE
 def count_accuracy(result):
     context = {}
     check = ResultDetail.objects.filter(result=result)
@@ -300,23 +300,20 @@ def result_session(request):
     context = {}
     total_result = Result.objects.all()
     total_video = Video.objects.all().values('id', 'answer')
-    users = User.objects.filter(is_superuser=False)
-    user_result = {}
-    for user in users:
-        user_result[user.id] = Result.objects.filter(user_id=user.id)
-    # video_list = ResultDetail.objects.filter(result).order_by('result_id')
-    print(total_video)
-
-
-
     context = {
         "total_result": total_result,
     }
+    # print(context)
     return render(request, 'statistical/result_session.html', context)
 
 
 def user_account(request):
-    context = {}
+    users = User.objects.filter(is_superuser=False)
+    user_info = UserInfo.objects.filter(user__in=users)
+    print(user_info)
+    context = {
+        "users": user_info
+    }
     return render(request, 'statistical/user_account.html', context)
 
 

@@ -76,12 +76,22 @@ class Result(models.Model):
         return User.objects.get(pk=self.user_id)
 
     @property
-    def total_anwser(self):
+    def total_answer(self):
         return self.result_detail.count()
 
     @property
-    def correct_anwser(self):
-        return 1
+    def correct_answer(self):
+        is_true = 0
+        total_video = Video.objects.values('id', 'answer')
+        detail = ResultDetail.objects.filter(result=self).values('video_id', 'answer')
+        for video in total_video:
+            for b in detail:
+                if video.get('id') == b.get('video_id'):
+                    diff = video.get('answer') == b.get('answer')
+                    if diff:
+                        is_true += 1
+
+        return is_true
 
     @property
     def accuracy_count(self):
@@ -124,9 +134,31 @@ class UserInfo(models.Model):
     confidence_level = models.CharField(blank=True, choices=CONFIDENCE_LEVEL, max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.user
+    #
+    # def __str__(self):
+    #     return self.user
 
     class Meta:
         verbose_name = 'User Info'
+
+    @property
+    def sessions_completed(self):
+        return Result.objects.filter(user=self.user_id).count()
+
+    @property
+    def get_user(self):
+        return self.user
+
+    @property
+    def clips_viewed(self):
+        return ResultDetail.objects.filter(result__user=self.user).count()
+
+    @property
+    def accuracy_most_recent(self):
+        # context = {}
+        # count_results = Result.objects.filter(user=self.user).all()
+        # for result in count_results:
+        #     context[result.id] = count_accuracy(result)
+        # accuracy = list(context.values())
+        # print(accuracy)
+        return 1
