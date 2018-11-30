@@ -1,0 +1,27 @@
+{% extends 'statistical/index.html' %}
+{% block main %}
+    <div class="col-md-10">
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>USER</th>
+                <th>CORRECT ANWSER / CLIPS VIEWED</th>
+                <th>TRAINING TYPE</th>
+                <th>ACCURACY THRESHOLD</th>
+                <th>ACCURACY THRESHOLD ACHIEVED</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for item in total_result %}
+                <tr class="text-center">
+                    <td>{{ item.get_user.username }}</td>
+                    <td>{{ item.correct_anwser }} / {{ item.total_anwser }}</td>
+                    <td>{{ item.training_type }}</td>
+                    <td>{{ item.accuracy }}</td>
+                    <td>{{ item.accuracy_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

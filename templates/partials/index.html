@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="{% static 'main.css' %}">
     </head>
     <body>
-    <div class="container" id="container_main">
+    <div class="container" id="container_main" style="width: 1320px">
         <nav class="navbar navbar-default" role="navigation">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
@@ -34,7 +34,12 @@
                     </a>
                     <ul class="dropdown-menu">
                         {% if request.user.is_authenticated %}
-                            <li><a href="{% url 'user_profile' %}">Show Result</a></li>
+
+                            {% if user.is_superuser %}
+                                <li><a href="/statistical">Statistical</a></li>
+                            {% else %}
+                                <li><a href="{% url 'user_profile' %}">Show Result</a></li>
+                            {% endif %}
                             <li><a href="{% url 'user_logout' %}">Logout</a></li>
                         {% else %}
                             <li><a href="{% url 'user_login' %}">Login</a></li>

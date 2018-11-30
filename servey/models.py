@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from .validators import validate_file_extension
 import datetime
+from decimal import Decimal
 # Create your models here.
 
 TRAINING_TYPE = (
@@ -70,29 +71,41 @@ class Result(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        verbose_name = 'Session Result'
-    # def video_viewed(self):
-    #     # accuracy = Result.objects.all()
-    #     # viewed = None
-    #     # for item in accuracy:
-    #     #     viewed[item.user_id] = ResultDetail.objects.filter(result=11).count()
-    #
-    #     return ResultDetail.objects.filter(result=11).count()
-    #
-    # def video(self, obj):
-    #     return ", ".join([
-    #         child.name for child in obj.children.all()
-    #     ])
-    #
-    # video.short_description = "video"
+    @property
+    def get_user(self):
+        return User.objects.get(pk=self.user_id)
 
-        # return self.training_type
-    #
-    # @property
-    # def accuracy_test(self):
-    #     print(self.count_video_viewed(self))
-    #     return self.count_video_viewed(self)
+    @property
+    def total_anwser(self):
+        return self.result_detail.count()
+
+    @property
+    def correct_anwser(self):
+        return 1
+
+    @property
+    def accuracy_count(self):
+        context = {}
+        check = ResultDetail.objects.filter(result=self.id)
+        if check is not None:
+            count_question = ResultDetail.objects.filter(result=self.id).count()
+            total_answer = ResultDetail.objects.filter(result=self.id)
+
+            context['true'] = 0
+            context['false'] = 0
+            for query_answer in total_answer:
+                video = query_answer.video.answer
+                answer_result = query_answer.answer
+                if video == answer_result:
+                    context['true'] += 1
+                else:
+                    context['false'] += 1
+
+            accuracy = format(Decimal(context['true'] * 100 / count_question), '.2f')
+            return accuracy
+
+    # class Meta:
+    #     verbose_name = 'Session Result'
 
 
 class ResultDetail(models.Model):

@@ -14,4 +14,10 @@ urlpatterns = [
     url(r'^login', views.user_login, name='user_login'),
     url(r'^logout', views.user_logout, name='user_logout'),
     url(r'^profile', views.user_profile, name='user_profile'),
+
+    url(r'^statistical', views.result_session, name='user_profile'),
+    url(r'^result_session$', views.result_session, name="result_session"),
+    url(r'^video', views.video, name="video"),
+    url(r'^user_account', views.user_account, name="user_account")
+
 ]

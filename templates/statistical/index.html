@@ -1,0 +1,15 @@
+{% extends 'partials/index.html' %}
+{% block content %}
+    <div class="col-md-12" style="padding-right: 0px;padding-left: 0px;">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Statistical</h3>
+            </div>
+            <div class="panel-body">
+                {% include 'statistical/sidebar.html' %}
+                {% block main %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

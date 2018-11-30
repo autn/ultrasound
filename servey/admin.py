@@ -1,17 +1,24 @@
 from django.contrib import admin
-import django.contrib.auth.admin
 from django.contrib.auth.models import User, Group
 from django.contrib import auth
 from django.contrib.auth.admin import UserAdmin
-from django.template import context
-
+from django.contrib.admin import AdminSite
 from servey.models import Video, Result, ResultDetail, UserInfo
 from servey.views import count_accuracy
 # Register your models here.
 
 
-# class InlineQuestion(admin.TabularInline):
-#     model = Answer
+# class MyAdminSite(AdminSite):
+#     def get_urls(self):
+#         urls = super(MyAdminSite, self).get_urls()
+#         # Note that custom urls get pushed to the list (not appended)
+#         # This doesn't work with urls += ...
+#         urls = [
+#             url(r'^$', self.admin_view(index))
+#         ] + urls
+#         return urls
+#
+# admin_site = MyAdminSite()
 
 
 @admin.register(Video)
@@ -20,63 +27,89 @@ class VideoAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['title']
     ordering = ('-created_at',)
-    # inlines = [InlineQuestion]
-
-    # def save_model(self, request, obj, form, change):
-    #     # custom stuff here
-    #     url = obj.URL
-    #     video_id = url.split("=")
-    #     obj.URL = video_id[1]
-    #     super().save_model(request, obj, form, change)
-    #     # obj.save()
 
 
 @admin.register(Result)
 class ResultAdmin(admin.ModelAdmin):
     def video_count(self, obj):
-        return obj.result_detail.count()
+
+        context = {}
+        videos = Video.objects.all().values('id', 'answer')
+        # video_list = ResultDetail.objects.filter(result_id=obj.id)
+
+        context['true'] = 0
+        # for is_true in video_list:
+        #     if is_true.answer == video_list.video.answer:
+        #         context['true'] += 1
+        #
+        # print(context)
+
+        video_list = ResultDetail.objects.filter(result_id=obj.id).order_by('result_id')
+        context['true'] = 0
+        for answer_correct in video_list:
+            answer_total = answer_correct.video.answer
+
+            answer_result = answer_correct.answer
+            print(answer_result)
+            if answer_total == answer_result:
+                context['true'] += 1
+
+        # print(video_list, videos)
+        # # c = Result.objects.filter(user_id=7)
+        # for item in b:
+        #     print(item)
+            # c = ResultDetail.objects.filter(result_id=)
+
+        return str(context.get('true')) + "/" + str(obj.result_detail.count())
+
+    # def correct_anwser(self, obj):
+    #     return 1
     video_count.short_description = "Correct Anwser / Clips viewed"
-    list_display = ['user', 'video_count', 'training_type', 'accuracy']
+    list_display = ['user', 'training_type', 'accuracy']
     list_filter = ['accuracy', 'training_type']
     search_fields = ['user']
-    change_list_template = 'admin/servey/result_change_list.html'
+    # change_list_template = 'admin/servey/Result/change_list.html'
+    # #
+    # # def changelist_view(self, request, extra_context=None):
+    # #     video = Video.objects.all()
+    # #     extra_context['a'] = video
+    # #     print(extra_context)
+    # #     return super(ResultAdmin, self).changelist_view(request, extra_context)
+    #
+    # def changelist_view(self, request, extra_context=None):
+    #     response = super().changelist_view(
+    #         request,
+    #         extra_context=extra_context,
+    #     )
+    #     try:
+    #         qs = response.context_data['cl'].queryset
+    #     except (AttributeError, KeyError):
+    #         return response
+    #     users = User.objects.all()
+    #     result = Result.objects.filter(user__in=users).all()
+    #     detail = {}
+    #     for item in result:
+    #         detail = ResultDetail.objects.filter(result=result).count()
+    #     print(detail)
+    #     # response.context_data['videos'] = detail
+    #
+    #     return response
+    #
 
-    def changelist_view(self, request, extra_context=None):
-        extra_context = extra_context or {}
-        extra_context['some_var'] = 'This is what I want to show'
-        return super(ResultAdmin, self).changelist_view(request, extra_context=extra_context)
 # admin.site.unregister(auth.models.User)
 admin.site.unregister(Group)
-
-# admin.site.site_header="Ultrasound trainer"
-# admin.site.site_title = "Ultrasound"
-# admin.site.index_title = "Ultrasound Admin"
+#
+admin.site.site_header="Ultrasound trainer"
+admin.site.site_title = "Ultrasound"
+admin.site.index_title = "Ultrasound Admin"
 
 
 @admin.register(UserInfo)
 class UserInfoAdmin(admin.ModelAdmin):
     def sessions_completed(self,obj):
-        # print(obj)
-        # return obj.user_result.count()
-        # print(count_results)
-        # pass
-        # # return count_results.user_result.count()
-        # for user in count_results:
-        #     context[user.id] = Result.objects.filter(user_id=user.id, close=True).count()
-        # return context.values()
         return Result.objects.filter(user__in=[obj.user]).count()
 
-
-
     def clips_viewed(self,obj):
-        # pass
-        # context = {}
-        # users = User.objects.all()
-        # for result in count:
-        #     context[result] = count_accuracy(result)
-        # return context.values()
-
-        # return obj.result_detail.count()
         return ResultDetail.objects.filter(result__user__in=[obj.user]).count()
 
     def accuracy_most_recent(self,obj):

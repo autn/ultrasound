@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from decimal import Decimal
 from django.conf import settings
-
+from django.template import RequestContext, loader
 # Create your views here.
 
 
@@ -254,6 +254,7 @@ def user_profile(request):
     else:
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
+# THONG KE
 
 def count_accuracy(result):
     context = {}
@@ -294,3 +295,31 @@ def start_new_session(request):
     else:
         return JsonResponse("Method 'GET' not allowed", safe=False)
 
+
+def result_session(request):
+    context = {}
+    total_result = Result.objects.all()
+    total_video = Video.objects.all().values('id', 'answer')
+    users = User.objects.filter(is_superuser=False)
+    user_result = {}
+    for user in users:
+        user_result[user.id] = Result.objects.filter(user_id=user.id)
+    # video_list = ResultDetail.objects.filter(result).order_by('result_id')
+    print(total_video)
+
+
+
+    context = {
+        "total_result": total_result,
+    }
+    return render(request, 'statistical/result_session.html', context)
+
+
+def user_account(request):
+    context = {}
+    return render(request, 'statistical/user_account.html', context)
+
+
+def video(request):
+    context = {}
+    return render(request, 'statistical/video.html', context)
