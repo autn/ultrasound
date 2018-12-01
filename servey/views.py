@@ -310,7 +310,7 @@ def result_session(request):
 def user_account(request):
     users = User.objects.filter(is_superuser=False)
     user_info = UserInfo.objects.filter(user__in=users)
-    print(user_info)
+    # print(user_info)
     context = {
         "users": user_info
     }

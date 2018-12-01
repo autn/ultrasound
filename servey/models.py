@@ -155,10 +155,5 @@ class UserInfo(models.Model):
 
     @property
     def accuracy_most_recent(self):
-        # context = {}
-        # count_results = Result.objects.filter(user=self.user).all()
-        # for result in count_results:
-        #     context[result.id] = count_accuracy(result)
-        # accuracy = list(context.values())
-        # print(accuracy)
-        return 1
+        result_users = Result.objects.filter(user=self.user).order_by('-created_at').first()
+        return result_users
