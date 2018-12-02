@@ -1,6 +1,22 @@
 {% extends 'statistical/index.html' %}
 {% block main %}
     <div class="col-md-10">
-        <h1>VIDEo</h1>
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th class="text-center">Video</th>
+                <th class="text-center">Session complete</th>
+                <th class="text-center">Video viewed</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for video in videos %}
+                <tr class="text-center">
+                    <td>{{ video }}</td>
+                    <td>{{ video }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 {% endblock %}

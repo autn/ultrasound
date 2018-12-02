@@ -318,5 +318,9 @@ def user_account(request):
 
 
 def video(request):
-    context = {}
+
+    videos = Video.objects.all()
+    context = {
+        "videos": videos
+    }
     return render(request, 'statistical/video.html', context)
