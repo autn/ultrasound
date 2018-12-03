@@ -5,15 +5,16 @@
             <thead>
             <tr>
                 <th class="text-center">Video</th>
-                <th class="text-center">Session complete</th>
-                <th class="text-center">Video viewed</th>
+                <th class="text-center">Correct answers/Total clips</th>
+                <th class="text-center">Accuracy</th>
             </tr>
             </thead>
             <tbody>
                 {% for video in videos %}
                 <tr class="text-center">
-                    <td>{{ video }}</td>
-                    <td>{{ video }}</td>
+                    <td><a href="{% url 'detail_video' video.id %}">{{ video }}</a></td>
+                    <td>{{ video.count_answer.total }} </td>
+                    <td>{{ video.count_answer.accuracy }}%</td>
                 </tr>
                 {% endfor %}
             </tbody>

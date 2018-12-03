@@ -71,6 +71,9 @@ $(document).ready(function () {
                     $(".video_viewed").text(data.video_viewed)
                     $(".overall_accuracy").text(data.overall_accuracy)
                 }else {
+                    if(data.training_type == 2){
+                        $(".close_session").hide()
+                    }
                     if (data.end_session == false){
                         $(".next_video").show();
                         $(".close_session").show();

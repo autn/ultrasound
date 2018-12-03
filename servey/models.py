@@ -13,7 +13,7 @@ TRAINING_TYPE = (
 )
 
 TRAINING_LEVEL = (
- ('Medical student', 'Medical student'),
+ ('Medical_student', 'Medical student'),
  ('Intern', 'Intern'),
  ('Resident', 'Resident'),
  ('Fellow', 'Fellow'),
@@ -60,6 +60,22 @@ class Video(models.Model):
 
     def __str__(self):
         return self.title
+
+    def count_answer(self):
+        total_answer = ResultDetail.objects.filter(video_id=self.id).count()
+        get_correct_answer = ResultDetail.objects.filter(video_id=self.id).values('answer')
+
+        correct = 0
+        for item in get_correct_answer:
+            if item.get('answer') == self.answer:
+                correct +=1
+
+        context = {
+            "total": str(correct) + "/" + str(total_answer),
+            "accuracy": format(Decimal(correct *100 / total_answer), '.2f')
+        }
+
+        return context
 
 
 class Result(models.Model):
@@ -151,7 +167,26 @@ class UserInfo(models.Model):
 
     @property
     def clips_viewed(self):
-        return ResultDetail.objects.filter(result__user=self.user).count()
+        context = {}
+
+        total_clips = ResultDetail.objects.filter(result__user=self.user)
+        count_question = ResultDetail.objects.filter(result__user=self.user).count()
+
+        context['true'] = 0
+        context['false'] = 0
+        for query_answer in total_clips:
+            video = query_answer.video.answer
+            answer_result = query_answer.answer
+            if video == answer_result:
+                context['true'] += 1
+            else:
+                context['false'] += 1
+
+        context = {
+            "count_question": str(context['true']) + "/" + str(count_question),
+            "accuracy": format(Decimal(context['true'] * 100 / count_question), '.2f')
+        }
+        return context
 
     @property
     def accuracy_most_recent(self):

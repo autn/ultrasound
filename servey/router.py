@@ -16,10 +16,10 @@ urlpatterns = [
     url(r'^logout', views.user_logout, name='user_logout'),
     url(r'^profile', views.user_profile, name='user_profile'),
 
-    # statistical
-    url(r'^statistical', views.result_session, name='statistical'),
+    # statistics
+    url(r'^statistics', views.result_session, name='statistics'),
     url(r'^result_session$', views.result_session, name="result_session"),
     url(r'^video', views.video, name="video"),
-    url(r'^user_account', views.user_account, name="user_account")
-
+    url(r'^user_account', views.user_account, name="user_account"),
+    url(r'^(?P<video_pk>\d+)', views.detail_video, name="detail_video"),
 ]

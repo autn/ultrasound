@@ -1,0 +1,47 @@
+{% extends 'statistical/index.html' %}
+{% block main %}
+    <div class="col-md-10">
+        <div class="col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-body">
+                    <div class="row">
+                        Video: <strong>{{ video }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-body">
+                    <div class="row">
+                        Correct answers/Total clips: <strong>{{ video.count_answer.total }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-body">
+                    <div class="row">
+                        Accuracy: <strong>{{ video.count_answer.accuracy }}%</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <p><strong>Accuracy by level of training(Correct answers/Total clips - Accuracy):</strong></p>
+            <ul class="list-group">
+                {% for experienceKey, experienceValue in training_level %}
+                    <li class="list-group-item">
+                        {{ experienceValue }}
+                        {% for item, value in type %}
+                            {% if experienceKey == item %}
+                                : <strong>{{ value }}</strong>
+                            {% endif %}
+                        {% endfor %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

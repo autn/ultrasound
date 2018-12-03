@@ -12,6 +12,7 @@ from django.urls import reverse
 from decimal import Decimal
 from django.conf import settings
 from django.template import RequestContext, loader
+
 # Create your views here.
 
 
@@ -54,7 +55,7 @@ def index(request):
             return render(request, 'servey/index.html',{"question_user": question_user})
             # return redirect('take_the_test')
     else:
-        return render(request, 'servey/index.html')
+        return redirect('user_login')
 
 
 def take_the_test(request):
@@ -99,6 +100,10 @@ def answer_response(request):
     answer_true = check_answer_true.get_answer_display()
 
     exits_user = Result.objects.filter(user=request.user).order_by('-updated_at').first()
+    if exits_user.training_type == TRAINING_TYPE[1][1]:
+        data['training_type'] = 2
+    else:
+        data['training_type'] = 1
     if not exits_user:
         result = Result.objects.create(user_id=request.user.id)
         ResultDetail.objects.create(answer=answer, result=result, video_id=question_id)
@@ -108,7 +113,7 @@ def answer_response(request):
         check_15 = ResultDetail.objects.filter(result=exits_user).count()
 
     training_type = Result.objects.filter(user=request.user, training_type=TRAINING_TYPE[1][1], close=False)
-    if training_type and check_15 >= 15: #15
+    if training_type and check_15 >= 3: #15
         result = Result.objects.filter(user=request.user, close=False).order_by('-updated_at').first()
         accuracy = count_accuracy(result)
         get_accuracy = Decimal(str(accuracy.get('accuracy'))[0:3])
@@ -136,7 +141,7 @@ def answer_response(request):
 
     else:
         data['status'] = False
-        data['message'] = "Correct! Ejection fraction is " + answer_true
+        data['message'] = "Incorrect! Ejection fraction is " + answer_true
         data['end_session'] = end_session
         return JsonResponse(data, safe=False)
 
@@ -164,7 +169,11 @@ def close_test(request):
 def result_test(request):
     result = Result.objects.filter(user=request.user, close=True).order_by('-updated_at').first()
     if result is not None:
-        context = count_accuracy(result)
+        context = {}
+        if result.training_type == TRAINING_TYPE[1][1]:
+            context['type'] = 2
+        context['result_test'] = count_accuracy(result)
+        print(context)
         return render(request, 'servey/result_test.html', context)
     else:
         return JsonResponse({"status": False, "messages": "Test has not been closed"}, safe=False)
@@ -180,7 +189,7 @@ def user_register(request):
         user.save()
 
         data = {
-            'institution': request.POST['institution'],
+            # 'institution': request.POST['institution'],
             'training_level': request.POST['training_level'],
             'experience': request.POST['experience_number'],
             'confidence_level': request.POST['confidence_level'],
@@ -193,7 +202,7 @@ def user_register(request):
             # messages.success(request, 'Register Successfully')
 
             user_info = form.save()
-            user_info.institution = form.cleaned_data['institution']
+            # user_info.institution = form.cleaned_data['institution']
             user_info.training_level = form.cleaned_data['training_level']
             user_info.experience = form.cleaned_data['experience']
             user_info.confidence_level = form.cleaned_data['confidence_level']
@@ -224,8 +233,11 @@ def user_login(request):
             return redirect('user_login')
         check_username = User.objects.get(email=email.lower()).username
         user = authenticate(request, username=check_username, password=password)
+        is_admin = User.objects.get(email=email.lower()).is_superuser
         if user is not None:
             login(request, user)
+            if is_admin:
+                return redirect('statistics')
             messages.success(request, 'Login Successfully')
             return redirect('index')
         else:
@@ -249,8 +261,14 @@ def user_profile(request):
         count_results = Result.objects.filter(user=request.user).all()
         for result in count_results:
             context[result.id]= count_accuracy(result)
-
-        return render(request, 'user/profile.html', {"count_results": count_results, "results" : context.items(), "count_questions": count_questions})
+        return render(
+            request, 'user/profile.html',
+            {
+                "count_results": count_results,
+                "results": context.items(),
+                "count_questions": count_questions
+            }
+        )
     else:
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -261,26 +279,27 @@ def count_accuracy(result):
     check = ResultDetail.objects.filter(result=result)
     if check is not None:
         count_question = ResultDetail.objects.filter(result=result).count()
-        total_answer = ResultDetail.objects.filter(result=result)
+        if count_question > 0:
+            total_answer = ResultDetail.objects.filter(result=result)
 
-        context['true'] = 0
-        context['false'] = 0
-        for query_answer in total_answer:
-            video = query_answer.video.answer
-            answer_result = query_answer.answer
-            if video == answer_result:
-                context['true'] += 1
-            else:
-                context['false'] += 1
+            context['true'] = 0
+            context['false'] = 0
+            for query_answer in total_answer:
+                video = query_answer.video.answer
+                answer_result = query_answer.answer
+                if video == answer_result:
+                    context['true'] += 1
+                else:
+                    context['false'] += 1
 
-        accuracy = format(Decimal(context['true'] * 100 / count_question), '.2f')
-        result_detail = ResultDetail.objects.filter(result=result).values_list('video_id').count()
-        context = {
-            "date": result.date,
-            "total_video": result_detail,
-            "accuracy": accuracy,
-        }
-        return context
+            accuracy = format(Decimal(context['true'] * 100 / count_question), '.2f')
+            result_detail = ResultDetail.objects.filter(result=result).values_list('video_id').count()
+            context = {
+                "date": result.date,
+                "total_video": result_detail,
+                "accuracy": accuracy,
+            }
+            return context
     else:
         return context
 
@@ -297,20 +316,16 @@ def start_new_session(request):
 
 
 def result_session(request):
-    context = {}
     total_result = Result.objects.all()
-    total_video = Video.objects.all().values('id', 'answer')
     context = {
         "total_result": total_result,
     }
-    # print(context)
     return render(request, 'statistical/result_session.html', context)
 
 
 def user_account(request):
     users = User.objects.filter(is_superuser=False)
     user_info = UserInfo.objects.filter(user__in=users)
-    # print(user_info)
     context = {
         "users": user_info
     }
@@ -318,9 +333,37 @@ def user_account(request):
 
 
 def video(request):
-
     videos = Video.objects.all()
     context = {
         "videos": videos
     }
     return render(request, 'statistical/video.html', context)
+
+
+def detail_video(request, video_pk):
+    context = {}
+    # users = User.objects.filter(is_superuser=False)
+    video_detail = get_object_or_404(Video, pk=video_pk)
+    result_detail = ResultDetail.objects.filter(video_id=video_pk).values_list('result__user_id', flat=True)
+    user_watch_video = UserInfo.objects.filter(user__in=result_detail)
+
+    type = {}
+    type['Medical_student'] = 0
+    type['Intern'] = 0
+    type['Resident'] = 0
+    type['Fellow'] = 0
+    type['Attending'] = 0
+    type['APP'] = 0
+    type['Other'] = 0
+
+    for key, value in TRAINING_LEVEL:
+        for user in user_watch_video:
+            if user.training_level == key:
+                type[key] += 1
+
+    context = {
+        "training_level": TRAINING_LEVEL,
+        "video": video_detail,
+        "type": type.items()
+    }
+    return render(request, 'statistical/video_detail.html', context)

@@ -6,7 +6,8 @@
             <tr>
                 <th class="text-center">User</th>
                 <th class="text-center">Session complete</th>
-                <th class="text-center">Video viewed</th>
+                <th class="text-center">Correct answers/Total clips</th>
+                <th class="text-center">Overall accuracy</th>
                 <th class="text-center">Accuracy most recent</th>
             </tr>
             </thead>
@@ -15,8 +16,9 @@
                 <tr class="text-center">
                     <td>{{ user.get_user }}</td>
                     <td>{{ user.sessions_completed }}</td>
-                    <td>{{ user.clips_viewed }}</td>
-                    <td>{{ user.accuracy_most_recent.accuracy_count }}</td>
+                    <td>{{ user.clips_viewed.count_question }}</td>
+                    <td>{{ user.clips_viewed.accuracy }}%</td>
+                    <td>{{ user.accuracy_most_recent.accuracy_count }}%</td>
                 </tr>
                 {% endfor %}
             </tbody>

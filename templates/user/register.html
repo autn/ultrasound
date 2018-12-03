@@ -27,7 +27,7 @@
                 <form method="post" action="{% url 'user_register' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="id_username" class="control-label">Username:</label>
+                        <label for="id_username" class="control-label">Your Institution:</label>
                         <input type="text" name="username" class="form-control" id="id_username" autocomplete="off">
                     </div>
                     <div class="form-group">
@@ -38,10 +38,10 @@
                         <label for="id_password" class="control-label">Password:</label>
                         <input type="password" name="password" class="form-control" id="id_password" autocomplete="off">
                     </div>
-                    <div class="form-group">
-                        <label for="id_institution" class="control-label">Your Institution:</label>
-                        <input type="text" name="institution" class="form-control" id="id_institution" autocomplete="off">
-                    </div>
+{#                    <div class="form-group">#}
+{#                        <label for="id_institution" class="control-label">Your Institution:</label>#}
+{#                        <input type="text" name="institution" class="form-control" id="id_institution" autocomplete="off">#}
+{#                    </div>#}
                     <div class="form-group">
                         <label for="training_level" class="control-label">Your level of training:</label>
 {#                        <input type="password" name="password" class="form-control" id="id_password" autocomplete="off">#}

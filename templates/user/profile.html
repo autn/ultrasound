@@ -3,7 +3,7 @@
     <div class="col-md-12" style="padding-right: 0px;padding-left: 0px;">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <h3 class="panel-title">User Result</h3>
+                <h3 class="panel-title">Your results</h3>
             </div>
             <div class="panel-body">
             {% if results %}
@@ -11,7 +11,7 @@
                     <thead>
                     <tr>
                         <th class="text-center">Date</th>
-                        <th class="text-center">Video viewed</th>
+                        <th class="text-center">Correct answers/Total viewed clips</th>
                         <th class="text-center">Overall accuracy (%)</th>
                     </tr>
                     </thead>
@@ -37,7 +37,6 @@
                 <h3 class="text-center">No result</h3>
             {% endif %}
             </div>
-            <div class="panel-footer"><h3 class="panel-title">Total videos: {{ count_questions }}</h3></div>
         </div>
     </div>
 {% endblock %}
