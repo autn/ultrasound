@@ -2,9 +2,12 @@ from distutils import version
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.aggregates import Sum, Avg
+import collections
 from .validators import validate_file_extension
 import datetime
 from decimal import Decimal
+from django.db.models import Count
 # Create your models here.
 
 TRAINING_TYPE = (
@@ -83,6 +86,7 @@ class Video(models.Model):
         type_correct = {}
         result_correct = {}
         level_correct = {}
+        user_type = {}
 
         training_type['Medical_student'] = 0
         training_type['Intern'] = 0
@@ -93,7 +97,43 @@ class Video(models.Model):
         training_type['Other'] = 0
 
         total_answer = ResultDetail.objects.filter(video_id=self)
-        result_detail = ResultDetail.objects.filter(video_id=self).values_list('result__user_id', flat=True)
+        result_detail = ResultDetail.objects.filter(video_id=self).values_list('result__user', flat=True)
+        this_answer = Video.objects.filter(pk=self).values_list('answer', flat=True)
+        # print(this_answer)
+        tra_loi_dung = ResultDetail.objects.filter(video_id=self, answer__in=this_answer).values_list('result__user', flat=True)
+        count_tra_loi = ResultDetail.objects.filter(video_id=self, answer__in=this_answer).values_list('result__user', flat=True).count()
+        print(count_tra_loi)
+
+        users = UserInfo.objects.all()
+        a = {}
+        b = {}
+        for item in tra_loi_dung:
+            print(item)
+            for user in users:
+                if item == user.user_id:
+                    a[item] = Result.objects.filter(user_id__in=item)
+        # print(UserInfo.objects.filter(user_id=(first_name__in=[item['first_name'] for item in duplicates])))
+        # for key, value in TRAINING_LEVEL:
+        #     for i in a.values():
+        #         if i.get('training_level') == key:
+        #             b[key] =
+
+        # select servey_resultdetail.video_id, count(servey_resultdetail.result_id)
+        # from servey_resultdetail
+        # inner join servey_result
+        #     on servey_resultdetail.result_id = servey_result.id
+        # inner join servey_userinfo
+        #     on servey_result.user_id = servey_userinfo.user_id
+        # inner join servey_video
+        #     on servey_resultdetail.video_id = servey_video.id
+        #     and servey_resultdetail.answer = servey_video.answer
+        # where
+        # 	  servey_video.id = 6
+        # and
+        #     servey_userinfo.training_level = "Intern"
+        # group by video_id
+
+
 
         # context['true'] = 0
         # context['false'] = 0
@@ -107,38 +147,48 @@ class Video(models.Model):
         #
         # print(context)
 
-        result_check = {}
-        for query_answer in total_answer:
-            answer_video = query_answer.video.answer
-            answer_result = query_answer.answer
-            result_correct[query_answer.id] = [query_answer.id, answer_video, answer_result]
+        # result_check = {}
+        # for query_answer in total_answer:
+        #     answer_video = query_answer.video.answer
+        #     answer_result = query_answer.answer
+        #     result_correct[query_answer.id] = [query_answer.id, answer_video, answer_result]
+        #
+        # for key, value in result_correct.items():
+        #     if value[1] == value[2]:
+        #         result_check[value[0]] = True
+        #     else:
+        #         result_check[value[0]] = False
+        #
+        # for key, result_id in result_check.items():
+        #     type_correct[key] = [ResultDetail.objects.filter(pk=key).values_list('result__user__user_info', flat=True),
+        #                          result_id]
+        #
+        # for item in type_correct.values():
+        #     if item[1] is True:
+        #         for level in item[0]:
+        #             # print(level)
+        #             level_correct[level] = UserInfo.objects.filter(pk=level).values_list('training_level', flat=True)
 
-        for key, value in result_correct.items():
-            if value[1] == value[2]:
-                result_check[value[0]] = True
-            else:
-                result_check[value[0]] = False
+        # print(result_detail)
 
-        for key, result_id in result_check.items():
-            type_correct[key] = [ResultDetail.objects.filter(pk=key).values_list('result__user__user_info', flat=True), result_id]
-
-        for item in type_correct.values():
-            if item[1] == True:
-                for level in item[0]:
-                    print(level)
-                    level_correct[level] = UserInfo.objects.filter(pk=level).values_list('training_level', flat=True)
-
-        # print(level_correct)
-
-        for key, value in TRAINING_LEVEL:
-            for user in result_detail:
+        for user in result_detail:
+            # print(user)
+            for key, value in TRAINING_LEVEL:
                 if UserInfo.objects.get(user=user).training_level == key:
                     training_type[key] += 1
+                user_type[key] = UserInfo.objects.filter(training_level=key).values_list('user_id', flat=True).all()
+
+        # print(user_type)
+        #
+        # for item in training_type:
+        #     print(item)
 
         context = {
             "training_type": training_type,
             "type_correct": type_correct
         }
+
+        # print(user_type)
 
         return context
 
