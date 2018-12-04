@@ -77,6 +77,71 @@ class Video(models.Model):
 
         return context
 
+    def count_correct_answer_by_level(self):
+        context = {}
+        training_type = {}
+        type_correct = {}
+        result_correct = {}
+        level_correct = {}
+
+        training_type['Medical_student'] = 0
+        training_type['Intern'] = 0
+        training_type['Resident'] = 0
+        training_type['Fellow'] = 0
+        training_type['Attending'] = 0
+        training_type['APP'] = 0
+        training_type['Other'] = 0
+
+        total_answer = ResultDetail.objects.filter(video_id=self)
+        result_detail = ResultDetail.objects.filter(video_id=self).values_list('result__user_id', flat=True)
+
+        # context['true'] = 0
+        # context['false'] = 0
+        # for query_answer in total_answer:
+        #     video = query_answer.video.answer
+        #     answer_result = query_answer.answer
+        #     if video == answer_result:
+        #         context['true'] += 1
+        #     else:
+        #         context['false'] += 1
+        #
+        # print(context)
+
+        result_check = {}
+        for query_answer in total_answer:
+            answer_video = query_answer.video.answer
+            answer_result = query_answer.answer
+            result_correct[query_answer.id] = [query_answer.id, answer_video, answer_result]
+
+        for key, value in result_correct.items():
+            if value[1] == value[2]:
+                result_check[value[0]] = True
+            else:
+                result_check[value[0]] = False
+
+        for key, result_id in result_check.items():
+            type_correct[key] = [ResultDetail.objects.filter(pk=key).values_list('result__user__user_info', flat=True), result_id]
+
+        for item in type_correct.values():
+            if item[1] == True:
+                for level in item[0]:
+                    print(level)
+                    level_correct[level] = UserInfo.objects.filter(pk=level).values_list('training_level', flat=True)
+
+        # print(level_correct)
+
+        for key, value in TRAINING_LEVEL:
+            for user in result_detail:
+                if UserInfo.objects.get(user=user).training_level == key:
+                    training_type[key] += 1
+
+        context = {
+            "training_type": training_type,
+            "type_correct": type_correct
+        }
+
+        return context
+
 
 class Result(models.Model):
     user = models.ForeignKey(User, related_name='user_result', on_delete=models.CASCADE)

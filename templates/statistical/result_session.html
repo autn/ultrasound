@@ -1,27 +1,29 @@
 {% extends 'statistical/index.html' %}
 {% block main %}
     <div class="col-md-10">
-        <table class="table table-bordered table-hover">
-            <thead>
-                <tr>
-                    <th class="text-center">User</th>
-                    <th class="text-center">Correct answers/Total clips</th>
-                    <th class="text-center">Training type</th>
-                    <th class="text-center">Accuracy threshold</th>
-                    <th class="text-center">Accuracy threshold achieved</th>
-                </tr>
-                </thead>
-            <tbody>
-                {% for item in total_result %}
-                <tr class="text-center">
-                    <td>{{ item.get_user.username }}</td>
-                    <td>{{ item.correct_answer }} / {{ item.total_answer }}</td>
-                    <td>{{ item.training_type }}</td>
-                    <td>{% if item.accuracy %}{{ item.accuracy }} {% else %} {{ "--" }}{% endif %}</td>
-                    <td>{{ item.accuracy_count }}%</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th class="text-center">User</th>
+                        <th class="text-center">Correct answers/Total clips</th>
+                        <th class="text-center">Training type</th>
+                        <th class="text-center">Accuracy threshold</th>
+                        <th class="text-center">Accuracy threshold achieved</th>
+                    </tr>
+                    </thead>
+                <tbody>
+                    {% for item in total_result %}
+                    <tr class="text-center">
+                        <td>{{ item.get_user.username }}</td>
+                        <td>{{ item.correct_answer }} / {{ item.total_answer }}</td>
+                        <td>{{ item.training_type }}</td>
+                        <td>{% if item.accuracy %}{{ item.accuracy }} {% else %} {{ "--" }}{% endif %}</td>
+                        <td>{{ item.accuracy_count }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 {% endblock %}

@@ -153,7 +153,6 @@ def close_test(request):
 
     if request.POST and exits_user is not None:
         result_user = Result.objects.filter(user=request.user, close=True)
-        print(result_user)
         if result_user is not None:
             close_result = Result.objects.filter(user=request.user).order_by('-updated_at').first()
             close_result.close = True
@@ -173,7 +172,6 @@ def result_test(request):
         if result.training_type == TRAINING_TYPE[1][1]:
             context['type'] = 2
         context['result_test'] = count_accuracy(result)
-        print(context)
         return render(request, 'servey/result_test.html', context)
     else:
         return JsonResponse({"status": False, "messages": "Test has not been closed"}, safe=False)
@@ -200,7 +198,6 @@ def user_register(request):
         if user is not None and form.is_valid():
             login(request, user)
             # messages.success(request, 'Register Successfully')
-
             user_info = form.save()
             # user_info.institution = form.cleaned_data['institution']
             user_info.training_level = form.cleaned_data['training_level']
@@ -273,7 +270,7 @@ def user_profile(request):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
-# THONG KE
+# statistics
 def count_accuracy(result):
     context = {}
     check = ResultDetail.objects.filter(result=result)
@@ -310,60 +307,62 @@ def start_new_session(request):
         if is_close is not None:
             is_close.close = True
             is_close.save()
-            return redirect('user_profile')
+            return redirect('index')
     else:
         return JsonResponse("Method 'GET' not allowed", safe=False)
 
 
+@login_required(login_url=settings.LOGIN_URL)
 def result_session(request):
-    total_result = Result.objects.all()
-    context = {
-        "total_result": total_result,
-    }
-    return render(request, 'statistical/result_session.html', context)
+    if request.user.is_authenticated:
+        total_result = Result.objects.all()
+        context = {
+            "total_result": total_result,
+        }
+
+        return render(request, 'statistical/result_session.html', context)
+    else:
+        return JsonResponse({"status": False, "messages": "Authentication required"},safe=False)
 
 
+@login_required(login_url=settings.LOGIN_URL)
 def user_account(request):
-    users = User.objects.filter(is_superuser=False)
-    user_info = UserInfo.objects.filter(user__in=users)
-    context = {
-        "users": user_info
-    }
-    return render(request, 'statistical/user_account.html', context)
+    if request.user.is_authenticated:
+        users = User.objects.filter(is_superuser=False)
+        user_info = UserInfo.objects.filter(user__in=users)
+        context = {
+            "users": user_info
+        }
+        return render(request, 'statistical/user_account.html', context)
+    else:
+        return JsonResponse({"status": False, "messages": "Authentication required"},safe=False)
 
 
+@login_required(login_url=settings.LOGIN_URL)
 def video(request):
-    videos = Video.objects.all()
-    context = {
-        "videos": videos
-    }
-    return render(request, 'statistical/video.html', context)
+    if request.user.is_authenticated:
+        videos = Video.objects.all()
+        context = {
+            "videos": videos
+        }
+        return render(request, 'statistical/video.html', context)
+    else:
+        return JsonResponse({"status": False, "messages": "Authentication required"},safe=False)
 
 
+@login_required(login_url=settings.LOGIN_URL)
 def detail_video(request, video_pk):
-    context = {}
-    # users = User.objects.filter(is_superuser=False)
-    video_detail = get_object_or_404(Video, pk=video_pk)
-    result_detail = ResultDetail.objects.filter(video_id=video_pk).values_list('result__user_id', flat=True)
-    user_watch_video = UserInfo.objects.filter(user__in=result_detail)
+    if request.user.is_authenticated:
+        video_detail = get_object_or_404(Video, pk=video_pk)
+        a = Video.count_correct_answer_by_level(self=video_pk)
 
-    type = {}
-    type['Medical_student'] = 0
-    type['Intern'] = 0
-    type['Resident'] = 0
-    type['Fellow'] = 0
-    type['Attending'] = 0
-    type['APP'] = 0
-    type['Other'] = 0
+        context = {
+            "training_level": TRAINING_LEVEL,
+            "video": video_detail,
+            "type": a.get("training_type").items(),
+        }
 
-    for key, value in TRAINING_LEVEL:
-        for user in user_watch_video:
-            if user.training_level == key:
-                type[key] += 1
-
-    context = {
-        "training_level": TRAINING_LEVEL,
-        "video": video_detail,
-        "type": type.items()
-    }
-    return render(request, 'statistical/video_detail.html', context)
+        # print(context)
+        return render(request, 'statistical/video_detail.html', context)
+    else:
+        return JsonResponse({"status": False, "messages": "Authentication required"},safe=False)

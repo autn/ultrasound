@@ -6,7 +6,7 @@
             <form action="{% url 'start_new_session' %}" method="POST" class="form">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary another_session">Start another session</button>
-                <a href="{% url 'user_profile' %}" class="btn btn-success see_result">See result</a>
+                <a href="{% url 'user_profile' %}" class="btn btn-success see_result">Your result</a>
             </form>
         </div>
     {% else %}
@@ -31,15 +31,15 @@
                 <h4><strong class="result"></strong></h4>
                 <button type="button" class="btn btn-info btn-block btn_answer" disabled>Answer</button>
             </form>
-{#            <a href="{% url 'close_test' %}" class="btn btn-success close_session" style="display: none" >End training session</a>#}
-            <form action="{%  url 'close_test' %}" method="POST">
+
+            <form action="{%  url 'close_test' %}" method="POST" id="form_result_session">
                 {% csrf_token %}
                 <button type="button" style="display: none" class="btn btn-primary next_video">View next clip</button>
-                <button class="btn btn-success close_session" style="display: none" type="submit" >End training session</button>
+                <button class="btn btn-success close_session_type_2" style="display: none" type="submit" >End training session</button>
             </form>
-            <form action="{% url 'close_test' %}" method="POST" id="id_form" style="display: none">
+
+            <form action="{% url 'close_test' %}" method="POST" id="form_end_session" style="display: none">
                 {% csrf_token %}
-{#                <a href="{% url 'user_profile' %}" class="btn btn-success see_result">End training session</a>#}
                 <button class="btn btn-success close_session" type="submit" >End training session</button>
             </form>
 

@@ -72,13 +72,17 @@ $(document).ready(function () {
                     $(".overall_accuracy").text(data.overall_accuracy)
                 }else {
                     if(data.training_type == 2){
-                        $(".close_session").hide()
+                        $(".close_session_type_2").hide()
+                    }else{
+                         $(".close_session_type_2").show()
                     }
+
                     if (data.end_session == false){
                         $(".next_video").show();
                         $(".close_session").show();
                     }else{
-                        $("#id_form").show()
+                        $("#form_end_session").show()
+                        $("#form_result_session").hide()
                         // $(".another_session").show();
                         // $(".see_result").show();
                     }
@@ -90,6 +94,14 @@ $(document).ready(function () {
 
     $(".next_video").click(function () {
         location.reload();
+    })
+
+    $("#training_type").change(function () {
+        if ($(this).val() == "Until accuracy threshold achieved"){
+            $("#percent").prop('required', true)
+        }else {
+            $("#percent").prop('required', false)
+        }
     })
 });
 
