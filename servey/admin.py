@@ -1,5 +1,6 @@
 from django.contrib import admin
 from servey.models import Video, Result, ResultDetail, UserInfo
+from django.contrib.auth.models import User, Group
 from servey.views import count_accuracy
 # Register your models here.
 
@@ -11,7 +12,7 @@ class VideoAdmin(admin.ModelAdmin):
     search_fields = ['title']
     ordering = ('-created_at',)
 
-
+admin.site.unregister(Group)
 admin.site.site_header="Ultrasound trainer"
 admin.site.site_title = "Ultrasound"
 admin.site.index_title = "Ultrasound Admin"

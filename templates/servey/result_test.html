@@ -11,14 +11,14 @@
                 </div>
                 <div class="panel-body">
                     <h3><strong class="congratulation_text"></strong></h3>
-                    <h3><strong>Number of clips viewed: {{ result_test.total_video }}</strong></h3>
+                    <h3><strong>Correct answers/Number of clips viewed: {{ result_test.total_video }}</strong></h3>
                     <h3><strong>Overall accuracy: {{ result_test.accuracy }}%</strong></h3>
                 </div>
                  <a href="{% url 'index' %}" class="btn btn-block btn-primary">New training session</a>
             </div>
             {% else %}
             <div class="col-md-4 col-md-offset-4 text-center">
-                <h3><strong>Number of clips viewed: {{ result_test.total_video }}</strong></h3>
+                <h3><strong>Correct answers/Number of clips viewed: {{ result_test.total_video }}</strong></h3>
                 <h3><strong>Overall accuracy: {{ result_test.accuracy }}%</strong></h3>
                 <a href="{% url 'index' %}" class="btn btn-primary">New training session</a>
             </div>

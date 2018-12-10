@@ -8,6 +8,7 @@ from .validators import validate_file_extension
 import datetime
 from decimal import Decimal
 from django.db.models import Count
+from django.db import connection
 # Create your models here.
 
 TRAINING_TYPE = (
@@ -73,10 +74,16 @@ class Video(models.Model):
             if item.get('answer') == self.answer:
                 correct +=1
 
-        context = {
-            "total": str(correct) + "/" + str(total_answer),
-            "accuracy": format(Decimal(correct *100 / total_answer), '.2f')
-        }
+        if correct > 0:
+            context = {
+                "total": str(correct) + "/" + str(total_answer),
+                "accuracy": format(Decimal(correct *100 / total_answer), '.2f')
+            }
+        else:
+            context = {
+                "total": '',
+                "accuracy": ''
+            }
 
         return context
 
@@ -87,7 +94,7 @@ class Video(models.Model):
         result_correct = {}
         level_correct = {}
         user_type = {}
-
+        corect_anwser = {}
         training_type['Medical_student'] = 0
         training_type['Intern'] = 0
         training_type['Resident'] = 0
@@ -99,19 +106,22 @@ class Video(models.Model):
         total_answer = ResultDetail.objects.filter(video_id=self)
         result_detail = ResultDetail.objects.filter(video_id=self).values_list('result__user', flat=True)
         this_answer = Video.objects.filter(pk=self).values_list('answer', flat=True)
-        # print(this_answer)
+
         tra_loi_dung = ResultDetail.objects.filter(video_id=self, answer__in=this_answer).values_list('result__user', flat=True)
         count_tra_loi = ResultDetail.objects.filter(video_id=self, answer__in=this_answer).values_list('result__user', flat=True).count()
-        print(count_tra_loi)
-
-        users = UserInfo.objects.all()
-        a = {}
-        b = {}
-        for item in tra_loi_dung:
-            print(item)
-            for user in users:
-                if item == user.user_id:
-                    a[item] = Result.objects.filter(user_id__in=item)
+        # print(tra_loi_dung)
+        #
+        # users = UserInfo.objects.all()
+        # a = {}
+        # query = ResultDetail.objects.raw('select servey_resultdetail.video_id, count(servey_resultdetail.result_id) from servey_resultdetail inner join servey_result on servey_resultdetail.result_id = servey_result.id inner join servey_userinfo on servey_result.user_id = servey_userinfo.user_id inner join servey_video on servey_resultdetail.video_id = servey_video.id and servey_resultdetail.answer = servey_video.answer where servey_video.id = 6 and servey_userinfo.training_level = "Intern" group by video_id')
+        # c =
+        # for p in c:
+        #     print(p)
+        # for item in tra_loi_dung:
+        #     print(item)
+        #     for user in users:
+        #         if item == user.user_id:
+        #             a[item] = Result.objects.filter(user_id__in=item)
         # print(UserInfo.objects.filter(user_id=(first_name__in=[item['first_name'] for item in duplicates])))
         # for key, value in TRAINING_LEVEL:
         #     for i in a.values():
@@ -172,11 +182,11 @@ class Video(models.Model):
         # print(result_detail)
 
         for user in result_detail:
-            # print(user)
             for key, value in TRAINING_LEVEL:
                 if UserInfo.objects.get(user=user).training_level == key:
                     training_type[key] += 1
-                user_type[key] = UserInfo.objects.filter(training_level=key).values_list('user_id', flat=True).all()
+                corect_anwser[key] = Video.my_custom_sql(video_id=self, training_level=key)
+
 
         # print(user_type)
         #
@@ -185,12 +195,18 @@ class Video(models.Model):
 
         context = {
             "training_type": training_type,
-            "type_correct": type_correct
+            "corect_anwser": corect_anwser
         }
 
         # print(user_type)
 
         return context
+
+    def my_custom_sql(video_id, training_level):
+        with connection.cursor() as cursor:
+            cursor.execute('select servey_resultdetail.video_id, count(servey_resultdetail.result_id) from servey_resultdetail inner join servey_result on servey_resultdetail.result_id = servey_result.id inner join servey_userinfo on servey_result.user_id = servey_userinfo.user_id inner join servey_video on servey_resultdetail.video_id = servey_video.id and servey_resultdetail.answer = servey_video.answer where servey_video.id = %s and servey_userinfo.training_level = %s group by video_id', [video_id, training_level])
+            row = cursor.fetchall()
+        return row
 
 
 class Result(models.Model):

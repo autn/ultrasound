@@ -234,7 +234,7 @@ def user_login(request):
         if user is not None:
             login(request, user)
             if is_admin:
-                return redirect('statistics')
+                return redirect('admin:index')
             messages.success(request, 'Login Successfully')
             return redirect('index')
         else:
@@ -293,7 +293,7 @@ def count_accuracy(result):
             result_detail = ResultDetail.objects.filter(result=result).values_list('video_id').count()
             context = {
                 "date": result.date,
-                "total_video": result_detail,
+                "total_video": str(context['true']) + "/" + str(result_detail),
                 "accuracy": accuracy,
             }
             return context
@@ -355,6 +355,8 @@ def detail_video(request, video_pk):
     if request.user.is_authenticated:
         video_detail = get_object_or_404(Video, pk=video_pk)
         a = Video.count_correct_answer_by_level(self=video_pk)
+
+        print(a.get("corect_anwser").get("Other")[0][1])
 
         context = {
             "training_level": TRAINING_LEVEL,

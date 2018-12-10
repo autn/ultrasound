@@ -13,7 +13,8 @@
             <tbody>
                 {% for video in videos %}
                 <tr class="text-center">
-                    <td><a href="{% url 'detail_video' video.id %}">{{ video }}</a></td>
+{#                    <td><a href="{% url 'detail_video' video.id %}">{{ video }}</a></td>#}
+                    <td>{{ video }}</td>
                     <td>{{ video.count_answer.total }} </td>
                     <td>{{ video.count_answer.accuracy }}%</td>
                 </tr>
