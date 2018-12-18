@@ -354,17 +354,13 @@ def video(request):
 def detail_video(request, video_pk):
     if request.user.is_authenticated:
         video_detail = get_object_or_404(Video, pk=video_pk)
-        a = Video.count_correct_answer_by_level(self=video_pk)
-
-        print(a.get("corect_anwser").get("Other")[0][1])
-
+        count_correct_answer = Video.count_correct_answer_by_level(self=video_pk)
         context = {
             "training_level": TRAINING_LEVEL,
             "video": video_detail,
-            "type": a.get("training_type").items(),
+            "type": count_correct_answer.get("training_type").items(),
+            "corect_anwser": count_correct_answer.get("correct_answer").items(),
         }
-
-        # print(context)
         return render(request, 'statistical/video_detail.html', context)
     else:
         return JsonResponse({"status": False, "messages": "Authentication required"},safe=False)

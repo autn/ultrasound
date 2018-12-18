@@ -88,13 +88,8 @@ class Video(models.Model):
         return context
 
     def count_correct_answer_by_level(self):
-        context = {}
         training_type = {}
-        type_correct = {}
-        result_correct = {}
-        level_correct = {}
-        user_type = {}
-        corect_anwser = {}
+        correct_answer = {}
         training_type['Medical_student'] = 0
         training_type['Intern'] = 0
         training_type['Resident'] = 0
@@ -103,106 +98,22 @@ class Video(models.Model):
         training_type['APP'] = 0
         training_type['Other'] = 0
 
-        total_answer = ResultDetail.objects.filter(video_id=self)
         result_detail = ResultDetail.objects.filter(video_id=self).values_list('result__user', flat=True)
-        this_answer = Video.objects.filter(pk=self).values_list('answer', flat=True)
-
-        tra_loi_dung = ResultDetail.objects.filter(video_id=self, answer__in=this_answer).values_list('result__user', flat=True)
-        count_tra_loi = ResultDetail.objects.filter(video_id=self, answer__in=this_answer).values_list('result__user', flat=True).count()
-        # print(tra_loi_dung)
-        #
-        # users = UserInfo.objects.all()
-        # a = {}
-        # query = ResultDetail.objects.raw('select servey_resultdetail.video_id, count(servey_resultdetail.result_id) from servey_resultdetail inner join servey_result on servey_resultdetail.result_id = servey_result.id inner join servey_userinfo on servey_result.user_id = servey_userinfo.user_id inner join servey_video on servey_resultdetail.video_id = servey_video.id and servey_resultdetail.answer = servey_video.answer where servey_video.id = 6 and servey_userinfo.training_level = "Intern" group by video_id')
-        # c =
-        # for p in c:
-        #     print(p)
-        # for item in tra_loi_dung:
-        #     print(item)
-        #     for user in users:
-        #         if item == user.user_id:
-        #             a[item] = Result.objects.filter(user_id__in=item)
-        # print(UserInfo.objects.filter(user_id=(first_name__in=[item['first_name'] for item in duplicates])))
-        # for key, value in TRAINING_LEVEL:
-        #     for i in a.values():
-        #         if i.get('training_level') == key:
-        #             b[key] =
-
-        # select servey_resultdetail.video_id, count(servey_resultdetail.result_id)
-        # from servey_resultdetail
-        # inner join servey_result
-        #     on servey_resultdetail.result_id = servey_result.id
-        # inner join servey_userinfo
-        #     on servey_result.user_id = servey_userinfo.user_id
-        # inner join servey_video
-        #     on servey_resultdetail.video_id = servey_video.id
-        #     and servey_resultdetail.answer = servey_video.answer
-        # where
-        # 	  servey_video.id = 6
-        # and
-        #     servey_userinfo.training_level = "Intern"
-        # group by video_id
-
-
-
-        # context['true'] = 0
-        # context['false'] = 0
-        # for query_answer in total_answer:
-        #     video = query_answer.video.answer
-        #     answer_result = query_answer.answer
-        #     if video == answer_result:
-        #         context['true'] += 1
-        #     else:
-        #         context['false'] += 1
-        #
-        # print(context)
-
-        # result_check = {}
-        # for query_answer in total_answer:
-        #     answer_video = query_answer.video.answer
-        #     answer_result = query_answer.answer
-        #     result_correct[query_answer.id] = [query_answer.id, answer_video, answer_result]
-        #
-        # for key, value in result_correct.items():
-        #     if value[1] == value[2]:
-        #         result_check[value[0]] = True
-        #     else:
-        #         result_check[value[0]] = False
-        #
-        # for key, result_id in result_check.items():
-        #     type_correct[key] = [ResultDetail.objects.filter(pk=key).values_list('result__user__user_info', flat=True),
-        #                          result_id]
-        #
-        # for item in type_correct.values():
-        #     if item[1] is True:
-        #         for level in item[0]:
-        #             # print(level)
-        #             level_correct[level] = UserInfo.objects.filter(pk=level).values_list('training_level', flat=True)
-
-        # print(result_detail)
 
         for user in result_detail:
             for key, value in TRAINING_LEVEL:
                 if UserInfo.objects.get(user=user).training_level == key:
                     training_type[key] += 1
-                corect_anwser[key] = Video.my_custom_sql(video_id=self, training_level=key)
-
-
-        # print(user_type)
-        #
-        # for item in training_type:
-        #     print(item)
+                correct_answer[key] = Video.get_result_by_video(video_id=self, training_level=key)
 
         context = {
             "training_type": training_type,
-            "corect_anwser": corect_anwser
+            "correct_answer": correct_answer
         }
-
-        # print(user_type)
 
         return context
 
-    def my_custom_sql(video_id, training_level):
+    def get_result_by_video(video_id, training_level):
         with connection.cursor() as cursor:
             cursor.execute('select servey_resultdetail.video_id, count(servey_resultdetail.result_id) from servey_resultdetail inner join servey_result on servey_resultdetail.result_id = servey_result.id inner join servey_userinfo on servey_result.user_id = servey_userinfo.user_id inner join servey_video on servey_resultdetail.video_id = servey_video.id and servey_resultdetail.answer = servey_video.answer where servey_video.id = %s and servey_userinfo.training_level = %s group by video_id', [video_id, training_level])
             row = cursor.fetchall()
