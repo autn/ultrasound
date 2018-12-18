@@ -74,10 +74,10 @@ class Video(models.Model):
             if item.get('answer') == self.answer:
                 correct +=1
 
-        if correct > 0:
+        if correct > 0 and total_answer > 0:
             context = {
                 "total": str(correct) + "/" + str(total_answer),
-                "accuracy": format(Decimal(correct *100 / total_answer), '.2f')
+                "accuracy": format(Decimal(correct * 100 / total_answer), '.2f')
             }
         else:
             context = {
@@ -168,9 +168,9 @@ class Result(models.Model):
                     context['true'] += 1
                 else:
                     context['false'] += 1
-
-            accuracy = format(Decimal(context['true'] * 100 / count_question), '.2f')
-            return accuracy
+            if count_question > 0:
+                accuracy = format(Decimal(context['true'] * 100 / count_question), '.2f')
+                return accuracy
 
     # class Meta:
     #     verbose_name = 'Session Result'
