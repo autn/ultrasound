@@ -81,8 +81,8 @@ class Video(models.Model):
             }
         else:
             context = {
-                "total": '',
-                "accuracy": ''
+                "total": '0/0',
+                "accuracy": '0.00'
             }
 
         return context
@@ -111,6 +111,9 @@ class Video(models.Model):
                     + ' - ' + format(Decimal(correct_count[0][1] * 100 / training_type[key]), '.2f') + '%'
                 else:
                     results[key] = '0' + '/' + str(training_type[key]) + ' - 0.00%'
+        if not results:
+            for key, value in TRAINING_LEVEL:
+                results[key] = '0/0 - 0.00%'
 
         context = {
             "results": results
