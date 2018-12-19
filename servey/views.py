@@ -18,6 +18,9 @@ from django.template import RequestContext, loader
 
 def index(request):
     if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect('statistics')
+
         user = get_object_or_404(User, pk=request.user.id)
 
         end_session = False
@@ -60,6 +63,8 @@ def index(request):
 
 def take_the_test(request):
     if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect('statistics')
         end_session = False
         user = get_object_or_404(User, pk=request.user.id)
 
@@ -355,6 +360,7 @@ def detail_video(request, video_pk):
     if request.user.is_authenticated:
         video_detail = get_object_or_404(Video, pk=video_pk)
         count_correct_answer = Video.count_correct_answer_by_level(self=video_pk)
+
         context = {
             "training_level": TRAINING_LEVEL,
             "video": video_detail,
