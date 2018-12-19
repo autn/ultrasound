@@ -358,8 +358,7 @@ def detail_video(request, video_pk):
         context = {
             "training_level": TRAINING_LEVEL,
             "video": video_detail,
-            "type": count_correct_answer.get("training_type").items(),
-            "corect_anwser": count_correct_answer.get("correct_answer").items(),
+            "results": count_correct_answer.get("results").items(),
         }
         return render(request, 'statistical/video_detail.html', context)
     else:

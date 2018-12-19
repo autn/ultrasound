@@ -33,22 +33,14 @@
             <ul class="list-group">
                 {% for experienceKey, experienceValue in training_level %}
                     <li class="list-group-item">
-                        {{experienceValue}}
-                        {%  for key, item in corect_anwser  %}
+                        {{experienceValue}}:
+                        <strong>
+                        {%  for key, item in results  %}
                             {% if experienceKey == key %}
-                                {% if not item %}
-                                    : <strong>{{ 0 }}</strong>
-                                {% else %}
-                                    : <strong>{{ item.0.1 }}</strong>
-                                {% endif %}
+                                {{ item }}
                             {% endif %}
                         {% endfor %}
-                        {% for item, value in type %}
-                            {% if experienceKey == item %}
-                                / <strong>{{ value }}</strong>
-                                - <strong> {% widthratio value total_answer 100 %}%</strong>
-                            {% endif %}
-                        {% endfor %}
+                        </strong>
                     </li>
                 {% endfor %}
             </ul>

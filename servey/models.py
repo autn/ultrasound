@@ -89,7 +89,7 @@ class Video(models.Model):
 
     def count_correct_answer_by_level(self):
         training_type = {}
-        correct_answer = {}
+        results = {}
         training_type['Medical_student'] = 0
         training_type['Intern'] = 0
         training_type['Resident'] = 0
@@ -104,11 +104,16 @@ class Video(models.Model):
             for key, value in TRAINING_LEVEL:
                 if UserInfo.objects.get(user=user).training_level == key:
                     training_type[key] += 1
-                correct_answer[key] = Video.get_result_by_video(video_id=self, training_level=key)
+                correct_count = Video.get_result_by_video(video_id=self, training_level=key)
+
+                if len(correct_count):
+                    results[key] = str(correct_count[0][1]) + '/' + str(training_type[key]) \
+                    + ' - ' + format(Decimal(correct_count[0][1] * 100 / training_type[key]), '.2f') + '%'
+                else:
+                    results[key] = '0' + '/' + str(training_type[key]) + ' - 0.00%'
 
         context = {
-            "training_type": training_type,
-            "correct_answer": correct_answer
+            "results": results
         }
 
         return context
@@ -117,6 +122,7 @@ class Video(models.Model):
         with connection.cursor() as cursor:
             cursor.execute('select servey_resultdetail.video_id, count(servey_resultdetail.result_id) from servey_resultdetail inner join servey_result on servey_resultdetail.result_id = servey_result.id inner join servey_userinfo on servey_result.user_id = servey_userinfo.user_id inner join servey_video on servey_resultdetail.video_id = servey_video.id and servey_resultdetail.answer = servey_video.answer where servey_video.id = %s and servey_userinfo.training_level = %s group by video_id', [video_id, training_level])
             row = cursor.fetchall()
+
         return row
 
 
