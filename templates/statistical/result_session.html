@@ -16,7 +16,7 @@
                     {% for item in total_result %}
                     <tr class="text-center">
                         <td>{{ item.get_user.username }}</td>
-                        <td>{{ item.correct_answer }} / {{ item.total_answer }}</td>
+                        <td>{{ item.correct_answer }}/{{ item.total_answer }}</td>
                         <td>{{ item.training_type }}</td>
                         <td>{% if item.accuracy %}{{ item.accuracy }} {% else %} {{ "--" }}{% endif %}</td>
                         <td>{{ item.accuracy_count }}%</td>

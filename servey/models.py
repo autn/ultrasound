@@ -106,7 +106,7 @@ class Video(models.Model):
                     training_type[key] += 1
                 correct_count = Video.get_result_by_video(video_id=self, training_level=key)
 
-                if len(correct_count):
+                if len(correct_count) and training_type[key] > 0:
                     results[key] = str(correct_count[0][1]) + '/' + str(training_type[key]) \
                     + ' - ' + format(Decimal(correct_count[0][1] * 100 / training_type[key]), '.2f') + '%'
                 else:
@@ -164,6 +164,7 @@ class Result(models.Model):
     def accuracy_count(self):
         context = {}
         check = ResultDetail.objects.filter(result=self.id)
+        accuracy = '0.00'
         if check is not None:
             count_question = ResultDetail.objects.filter(result=self.id).count()
             total_answer = ResultDetail.objects.filter(result=self.id)
@@ -179,10 +180,7 @@ class Result(models.Model):
                     context['false'] += 1
             if count_question > 0:
                 accuracy = format(Decimal(context['true'] * 100 / count_question), '.2f')
-                return accuracy
-
-    # class Meta:
-    #     verbose_name = 'Session Result'
+        return accuracy
 
 
 class ResultDetail(models.Model):
