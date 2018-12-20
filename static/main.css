@@ -35,3 +35,12 @@ ul li{
 #id_form{
     display: none;
 }
+.panel-primary .list-group .list-group-item:hover {
+    background-color: #337ab7;
+    border-color: #337ab7;
+}
+.panel-primary .list-group .list-group-item:hover a,
+.panel-primary .list-group .list-group-item.active a {
+    color: white;
+    text-decoration: none;
+}

@@ -19,7 +19,7 @@ urlpatterns = [
     # statistics
     url(r'^statistics', views.result_session, name='statistics'),
     url(r'^result_session$', views.result_session, name="result_session"),
-    url(r'^video', views.video, name="video"),
+    url(r'^videos', views.videos, name="videos"),
     url(r'^user_account', views.user_account, name="user_account"),
-    url(r'^(?P<video_pk>\d+)', views.detail_video, name="detail_video"),
+    url(r'^video/(?P<video_pk>\d+)', views.detail_video, name="detail_video"),
 ]

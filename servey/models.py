@@ -231,9 +231,14 @@ class UserInfo(models.Model):
             else:
                 context['false'] += 1
 
+        if count_question > 0:
+            accuracy = format(Decimal(context['true'] * 100 / count_question), '.2f')
+        else:
+            accuracy = '0.00'
+
         context = {
             "count_question": str(context['true']) + "/" + str(count_question),
-            "accuracy": format(Decimal(context['true'] * 100 / count_question), '.2f')
+            "accuracy": accuracy
         }
         return context
 

@@ -40,7 +40,7 @@
                                 <li><a href="{% url 'statistics' %}">Statistics</a></li>
                                 <li><a href="{% url 'admin:index' %}">Admin</a></li>
                             {% else %}
-                                <li><a href="{% url 'user_profile' %}">Show Result</a></li>
+                                <li><a href="{% url 'user_profile' %}">Your results</a></li>
                             {% endif %}
                             <li><a href="{% url 'user_logout' %}">Logout</a></li>
                         {% else %}

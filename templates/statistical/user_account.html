@@ -19,7 +19,11 @@
                     <td>{{ user.sessions_completed }}</td>
                     <td>{{ user.clips_viewed.count_question }}</td>
                     <td>{{ user.clips_viewed.accuracy }}%</td>
-                    <td>{{ user.accuracy_most_recent.accuracy_count }}%</td>
+                    {% if not user.accuracy_most_recent %}
+                        <td>0.00%</td>
+                    {% else %}
+                        <td>{{ user.accuracy_most_recent.accuracy_count }}%</td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>

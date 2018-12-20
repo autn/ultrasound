@@ -277,7 +277,12 @@ def user_profile(request):
 
 # statistics
 def count_accuracy(result):
-    context = {}
+    context = {
+        'date': result.date,
+        'total_video': '0/0',
+        'threshold': '--',
+        'accuracy': '0.00',
+    }
     check = ResultDetail.objects.filter(result=result)
     if check is not None:
         count_question = ResultDetail.objects.filter(result=result).count()
@@ -296,14 +301,19 @@ def count_accuracy(result):
 
             accuracy = format(Decimal(context['true'] * 100 / count_question), '.2f')
             result_detail = ResultDetail.objects.filter(result=result).values_list('video_id').count()
+            if len(result.accuracy):
+                threshold = result.accuracy
+            else:
+                threshold = '--'
             context = {
-                "date": result.date,
-                "total_video": str(context['true']) + "/" + str(result_detail),
-                "accuracy": accuracy,
+                'date': result.date,
+                'total_video': str(context['true']) + '/' + str(result_detail),
+                'threshold': threshold,
+                'accuracy': accuracy,
             }
             return context
-    else:
-        return context
+
+    return context
 
 
 def start_new_session(request):
@@ -344,7 +354,7 @@ def user_account(request):
 
 
 @login_required(login_url=settings.LOGIN_URL)
-def video(request):
+def videos(request):
     if request.user.is_authenticated:
         videos = Video.objects.all()
         context = {
