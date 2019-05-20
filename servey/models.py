@@ -9,7 +9,10 @@ import datetime
 from decimal import Decimal
 from django.db.models import Count
 from django.db import connection
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 # Create your models here.
+
+ITEMS_PER_PAGE = 30
 
 TRAINING_TYPE = (
  ('Open training session', 'Open training session'),
@@ -46,6 +49,14 @@ ACCURACY_THRESHOLD = (
  ('80%', '80%'),
  ('90%', '90%'),
  ('95%', '95%'),
+)
+
+PRIOR_TRAINING = (
+ ('None', 'None'),
+ ('Online videos/didactics', 'Online videos/didactics'),
+ ('Hands-on instruction with real or standardized patients', 'Hands-on instruction with real or standardized patients'),
+ ('Structured course including didactics and hands on instruction:<1 week duration', 'Structured course including didactics and hands on instruction: <1 week duration'),
+ ('Clinical ultrasound rotation 1-4 weeks', 'Clinical ultrasound rotation 1-4 weeks'),
 )
 
 
@@ -134,6 +145,7 @@ class Result(models.Model):
     date = models.DateTimeField(default=datetime.datetime.utcnow, blank=True)
     close = models.BooleanField(default=False, verbose_name="Test is close?", blank=True)
     training_type = models.CharField(choices=TRAINING_TYPE, blank=True, null=True, max_length=255)
+    # prior_training = models.CharField(choices=PRIOR_TRAINING, blank=True, null=True, max_length=255)
     accuracy = models.CharField(max_length=255, choices=ACCURACY_THRESHOLD, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -194,9 +206,10 @@ class ResultDetail(models.Model):
 class UserInfo(models.Model):
     user = models.OneToOneField(User, related_name='user_info', on_delete=models.CASCADE)
     institution = models.TextField(blank=True, null=True, max_length=255)
-    training_level =  models.CharField(choices=TRAINING_LEVEL, max_length=255,  blank=True, null=True)
+    training_level = models.CharField(choices=TRAINING_LEVEL, max_length=255, blank=True, null=True)
     experience = models.CharField(choices=EXPERIENCE_NUMBER, blank=True, null=True, max_length=255)
     confidence_level = models.CharField(blank=True, choices=CONFIDENCE_LEVEL, max_length=255, null=True)
+    prior_training = models.CharField(choices=PRIOR_TRAINING, max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     #
@@ -213,6 +226,10 @@ class UserInfo(models.Model):
     @property
     def get_user(self):
         return self.user
+
+    @property
+    def get_user_id(self):
+        return self.user.id
 
     @property
     def clips_viewed(self):
@@ -246,3 +263,18 @@ class UserInfo(models.Model):
     def accuracy_most_recent(self):
         result_users = Result.objects.filter(user=self.user).order_by('-created_at').first()
         return result_users
+
+
+class Pager(models.Model):
+    def view(request, list):
+        page = request.GET.get('page', 1)
+        paginator = Paginator(list, ITEMS_PER_PAGE)
+
+        try:
+            model = paginator.page(page)
+        except PageNotAnInteger:
+            model = paginator.page(1)
+        except EmptyPage:
+            model = paginator.page(paginator.num_pages)
+
+        return model

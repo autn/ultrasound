@@ -15,7 +15,9 @@
             <tbody>
                 {% for user in users %}
                 <tr class="text-center">
-                    <td>{{ user.get_user }}</td>
+                    <td><a href="{% url 'user_profile' user.get_user_id %}?return={{ users.number }}">
+                      {{ user.get_user }}</a>
+                    </td>
                     <td>{{ user.sessions_completed }}</td>
                     <td>{{ user.clips_viewed.count_question }}</td>
                     <td>{{ user.clips_viewed.accuracy }}%</td>
@@ -29,5 +31,6 @@
             </tbody>
         </table>
     </div>
+    {% include 'partials/pager.html' with model=users request=request %}
     </div>
 {% endblock %}

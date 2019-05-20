@@ -12,8 +12,8 @@
     {% else %}
         <div class="col-md-7">
             <h3>{{ random_video.title }}</h3>
-            <video width="100%" controls loop>
-                  <source src="{{ random_video.path.url }}" type="video/mp4">
+            <video onloadeddata="this.play();" width="100%" playsinline muted loop controls autoplay="autoplay">
+                <source src="{{ random_video.path.url }}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
@@ -24,7 +24,7 @@
                 <ul style="list-style: none;">
                     {% for answerKey, answerValue in answers %}
                     <li>
-                        <label for="#{{ answerKey }}"><input class="answer" name="answer" data-true="{% if answerKey == random_video.answer %}{{ True }}{% else %}{{ False }}{% endif %}" type="radio" value="{{ answerKey }}" id="#{{ answerKey }}"> {{ answerValue }}</label>
+                        <label><input class="answer" name="answer_{{ random_video.id }}" data-true="{% if answerKey == random_video.answer %}{{ True }}{% else %}{{ False }}{% endif %}" type="radio" value="{{ answerKey }}"> {{ answerValue }}</label>
                     </li>
                     {% endfor %}
                 </ul>

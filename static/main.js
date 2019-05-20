@@ -35,7 +35,7 @@ $(document).ready(function () {
             $(".percent").hide()
         }
     });
-    
+
     $(".answer").click(function () {
         $(".btn_answer").removeAttr('disabled');
     });
@@ -43,7 +43,7 @@ $(document).ready(function () {
     $(".btn_answer").click(function () {
         $(".answer").attr('disabled', true);
 
-        var el = $("[name='answer']:checked");
+        var el = $("[name^='answer']:checked");
         $(el).attr('disabled', false);
 
         $.each($(".answer"), function (i, e) {
@@ -104,5 +104,3 @@ $(document).ready(function () {
         }
     })
 });
-
-

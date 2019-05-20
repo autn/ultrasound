@@ -1,7 +1,11 @@
-{% extends 'statistical/index.html' %}
-{% block main %}
-    <div class="col-md-10">
-        <div class="table-responsive">
+{% extends 'partials/index.html' %}
+{% block content %}
+    <div class="col-md-12" style="padding-right: 0px;padding-left: 0px;">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Results</h3>
+            </div>
+            <div class="panel-body">
             {% if results %}
                 <table class="table table-bordered table-hover">
                     <thead>
@@ -14,11 +18,19 @@
                     </thead>
                     <tbody>
                     {% for key, values in results %}
+{#                            <td class="text-center"><strong>{{ result.date|date }}</strong></td>#}
+{#                        <td class="text-center"><strong>{{ values }}</strong></td>#}
+
                         <tr>
                             {% for key, value in values.items %}
                                 <td class="text-center">{{ value }}</td>
                             {% endfor %}
                         </tr>
+{#                        #}
+{##}
+{#                            <td class="text-center"><strong>{{ accuracy }}</strong> %</td>#}
+{#                            <td class="text-center"><strong>{{ forloop.counter }}</strong></td>#}
+
                     {% endfor %}
                     </tbody>
                 </table>
@@ -26,7 +38,7 @@
             {% else %}
                 <h3 class="text-center">No result</h3>
             {% endif %}
-            <a href="{% url 'user_account' %}?page={{ request.GET.return }}" class="btn btn-info btn-block">Back</a>
+            </div>
         </div>
     </div>
 {% endblock %}

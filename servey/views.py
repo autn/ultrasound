@@ -2,17 +2,17 @@ from django.shortcuts import render, redirect, render_to_response
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
-from servey.models import TRAINING_TYPE, TRAINING_LEVEL, ACCURACY_THRESHOLD, CONFIDENCE_LEVEL, EXPERIENCE_NUMBER, UserInfo, Video, Result, ResultDetail
+from servey.models import TRAINING_TYPE, TRAINING_LEVEL, ACCURACY_THRESHOLD, CONFIDENCE_LEVEL, \
+    PRIOR_TRAINING, EXPERIENCE_NUMBER, UserInfo, Video, Result, ResultDetail, Pager
 from servey.forms import UserInfoForm
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from decimal import Decimal
 from django.conf import settings
 from django.template import RequestContext, loader
-
 # Create your views here.
 
 
@@ -99,7 +99,7 @@ def take_the_test(request):
 def answer_response(request):
     data = {}
     question_id = request.POST['question_id']
-    answer = request.POST['answer']
+    answer = request.POST['answer_' + question_id]
     check = Video.objects.filter(pk=question_id, answer=answer).first()
     check_answer_true = Video.objects.filter(pk=question_id).first()
     answer_true = check_answer_true.get_answer_display()
@@ -118,7 +118,7 @@ def answer_response(request):
         check_15 = ResultDetail.objects.filter(result=exits_user).count()
 
     training_type = Result.objects.filter(user=request.user, training_type=TRAINING_TYPE[1][1], close=False)
-    if training_type and check_15 >= 3: #15
+    if training_type and check_15 >= 15: #15
         result = Result.objects.filter(user=request.user, close=False).order_by('-updated_at').first()
         accuracy = count_accuracy(result)
         get_accuracy = Decimal(str(accuracy.get('accuracy'))[0:3])
@@ -185,14 +185,14 @@ def result_test(request):
 # User register, login, logout
 def user_register(request):
     if request.method == 'POST':
-        username = request.POST['username']
+        # username = request.POST['username']
         password = request.POST['password']
         email = request.POST['email']
-        user = User.objects.create_user(username, email, password)
+        user = User.objects.create_user(email, email, password)
         user.save()
 
         data = {
-            # 'institution': request.POST['institution'],
+            'institution': request.POST['institution'],
             'training_level': request.POST['training_level'],
             'experience': request.POST['experience_number'],
             'confidence_level': request.POST['confidence_level'],
@@ -218,6 +218,7 @@ def user_register(request):
         context = {
                 'training_level': TRAINING_LEVEL,
                 'confidence_level': CONFIDENCE_LEVEL,
+                'prior_training': PRIOR_TRAINING,
                 'experience_number': EXPERIENCE_NUMBER
              }
         return render(request, "user/register.html", context)
@@ -256,19 +257,27 @@ def user_logout(request):
 
 
 @login_required(login_url=settings.LOGIN_URL)
-def user_profile(request):
+def user_profile(request, user_pk=False):
     if request.user.is_authenticated:
         context = {}
         count_questions = Video.objects.count()
-        count_results = Result.objects.filter(user=request.user).all()
+        if user_pk:
+            user = User.objects.get(id=user_pk)
+            template = 'user/profile.html'
+        else:
+            user = request.user
+            template = 'user/me.html'
+
+        list = Result.objects.filter(user=user).all()
+        count_results = Pager.view(request, list)
         for result in count_results:
-            context[result.id]= count_accuracy(result)
+            context[result.id] = count_accuracy(result)
         return render(
-            request, 'user/profile.html',
+            request, template,
             {
-                "count_results": count_results,
-                "results": context.items(),
-                "count_questions": count_questions
+                'count_results': count_results,
+                'results': context.items(),
+                'count_questions': count_questions
             }
         )
     else:
@@ -327,10 +336,11 @@ def start_new_session(request):
         return JsonResponse("Method 'GET' not allowed", safe=False)
 
 
-@login_required(login_url=settings.LOGIN_URL)
+@user_passes_test(lambda u: u.is_superuser)
 def result_session(request):
     if request.user.is_authenticated:
-        total_result = Result.objects.all()
+        list = Result.objects.all()
+        total_result = Pager.view(request, list)
         context = {
             "total_result": total_result,
         }
@@ -340,41 +350,41 @@ def result_session(request):
         return JsonResponse({"status": False, "messages": "Authentication required"},safe=False)
 
 
-@login_required(login_url=settings.LOGIN_URL)
+@user_passes_test(lambda u: u.is_superuser)
 def user_account(request):
     if request.user.is_authenticated:
         users = User.objects.filter(is_superuser=False)
         user_info = UserInfo.objects.filter(user__in=users)
+        user_list = Pager.view(request, user_info)
         context = {
-            "users": user_info
+            "users": user_list
         }
         return render(request, 'statistical/user_account.html', context)
     else:
         return JsonResponse({"status": False, "messages": "Authentication required"},safe=False)
 
-
-@login_required(login_url=settings.LOGIN_URL)
+@user_passes_test(lambda u: u.is_superuser)
 def videos(request):
     if request.user.is_authenticated:
-        videos = Video.objects.all()
-        context = {
-            "videos": videos
-        }
-        return render(request, 'statistical/video.html', context)
+        list = Video.objects.order_by('id').all()
+        videos = Pager.view(request, list)
+
+        return render(request, 'statistical/video.html', { 'videos': videos })
     else:
         return JsonResponse({"status": False, "messages": "Authentication required"},safe=False)
 
-
-@login_required(login_url=settings.LOGIN_URL)
+@user_passes_test(lambda u: u.is_superuser)
 def detail_video(request, video_pk):
     if request.user.is_authenticated:
         video_detail = get_object_or_404(Video, pk=video_pk)
         count_correct_answer = Video.count_correct_answer_by_level(self=video_pk)
+        re = request.GET.get('return', 1)
 
         context = {
             "training_level": TRAINING_LEVEL,
             "video": video_detail,
             "results": count_correct_answer.get("results").items(),
+            'return': re,
         }
         return render(request, 'statistical/video_detail.html', context)
     else:

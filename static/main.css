@@ -44,3 +44,6 @@ ul li{
     color: white;
     text-decoration: none;
 }
+.pagination {
+  margin: 1px 0;
+}

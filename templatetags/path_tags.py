@@ -8,3 +8,10 @@ def is_video_path(path):
         return 'active'
 
     return ''
+
+@register.simple_tag
+def is_user_path(path):
+    if path == '/user_account' or path.startswith('/profile/'):
+        return 'active'
+
+    return ''
