@@ -27,21 +27,21 @@
                 <form method="post" action="{% url 'user_register' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
+                      <label for="id_email" class="control-label">Email:</label>
+                      <input type="email" name="email" class="form-control" id="id_email" autocomplete="off">
+                    </div>
+                    <!-- <div class="form-group">
                         <label for="id_username" class="control-label">Your Institution:</label>
                         <input type="text" name="username" class="form-control" id="id_username" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label for="id_email" class="control-label">Email:</label>
-                        <input type="email" name="email" class="form-control" id="id_email" autocomplete="off">
-                    </div>
+                    </div> -->
                     <div class="form-group">
                         <label for="id_password" class="control-label">Password:</label>
                         <input type="password" name="password" class="form-control" id="id_password" autocomplete="off">
                     </div>
-{#                    <div class="form-group">#}
-{#                        <label for="id_institution" class="control-label">Your Institution:</label>#}
-{#                        <input type="text" name="institution" class="form-control" id="id_institution" autocomplete="off">#}
-{#                    </div>#}
+                    <div class="form-group">
+                        <label for="id_institution" class="control-label">Your Institution:</label>
+                        <input type="text" name="institution" class="form-control" id="id_institution" autocomplete="off">
+                    </div>
                     <div class="form-group">
                         <label for="training_level" class="control-label">Your level of training:</label>
 {#                        <input type="password" name="password" class="form-control" id="id_password" autocomplete="off">#}
@@ -64,6 +64,14 @@
                         <select name="confidence_level" class="form-control" id="confidence_level" >
                             {% for confidenceKey, confidenceValue in confidence_level %}
                                <option value="{{ confidenceKey }}">{{ confidenceValue }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="prior_training" class="control-label">Prior ultrasound training:</label>
+                        <select name="prior_training" class="form-control" id="prior_training" >
+                            {% for priorKey, priorValue in prior_training %}
+                               <option value="{{ priorKey }}">{{ priorValue }}</option>
                             {% endfor %}
                         </select>
                     </div>

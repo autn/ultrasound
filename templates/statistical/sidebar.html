@@ -12,9 +12,7 @@
       {% is_video_path path %}
       "><a href="{% url 'videos' %}">Videos</a></li>
       <li class="list-group-item
-      {% if path == '/user_account' %}
-        active
-      {% endif %}
+      {% is_user_path path %}
       "><a href="{% url 'user_account' %}">User Accounts</a></li>
     </ul>
   {% endwith %}

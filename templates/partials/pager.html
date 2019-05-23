@@ -1,0 +1,24 @@
+{% if model.has_other_pages %}
+  <ul class="pagination">
+    {% if model.has_previous %}
+      <li><a href="?page={{ model.previous_page_number }}{% if request.GET.return %}&return={{ request.GET.return }}{% endif %}">&laquo;
+      </a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in model.paginator.page_range %}
+      {% if model.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}{% if request.GET.return %}&return={{ request.GET.return }}{% endif %}">{{ i }}
+        </a></li>
+      {% endif %}
+    {% endfor %}
+    {% if model.has_next %}
+      <li><a href="?page={{ model.next_page_number }}{% if request.GET.return %}&return={{ request.GET.return }}{% endif %}">&raquo;
+      </a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
