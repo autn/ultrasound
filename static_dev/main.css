@@ -1,0 +1,49 @@
+#container_main {
+    padding-top: 15px;
+}
+
+.row {
+     margin-right: 0;
+     margin-left: 0;
+}
+
+#training_type{
+    margin-right: 10px;
+}
+h3{
+    margin-top: 6px;
+    margin-right: 10px;
+}
+/*.flex{*/
+    /*display: flex;*/
+    /*justify-content: flex-start;*/
+/*}*/
+
+.alert-error{
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+ul li{
+    list-style-type: none;
+}
+.percent{
+    display: none;
+}
+
+#id_form{
+    display: none;
+}
+.panel-primary .list-group .list-group-item:hover {
+    background-color: #337ab7;
+    border-color: #337ab7;
+}
+.panel-primary .list-group .list-group-item:hover a,
+.panel-primary .list-group .list-group-item.active a {
+    color: white;
+    text-decoration: none;
+}
+.pagination {
+  margin: 1px 0;
+}
