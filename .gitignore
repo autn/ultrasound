@@ -4,6 +4,7 @@
 *.pyc
 *.swp
 media/
+static/
 servey/migrations/
 
 # Elastic Beanstalk Files
