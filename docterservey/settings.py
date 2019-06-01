@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'yec_ph$%$(58laxdkj11-o%^*wlqd53k%zruxv+n=d9da7gp&_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -111,8 +111,8 @@ else:
             'NAME': 'mydb',
             'USER': 'dbuser',
             'PASSWORD': 'db123',
-            'HOST': 'db',   # Or an IP Address that your DB is hosted on
-            'PORT': '3306',
+            'HOST': '127.0.0.1',   # Or an IP Address that your DB is hosted on
+            'PORT': '3303',
         }
     }
 
@@ -160,9 +160,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
-    BASE_DIR + '/media/videos/',
+    BASE_DIR + '/static_dev/',
 )
-STATIC_ROOT = '/static/'
+STATIC_ROOT = BASE_DIR + '/static/'
 
 
 MEDIA_URL = '/media/'
